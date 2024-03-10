@@ -1,0 +1,39 @@
+name: Cache files to Amazon S3
+description: GitHub Action to save cache files and restore them from Amazon S3
+author: itchyny
+inputs:
+  path:
+    description: A list of file paths or glob patterns to save and restore
+    required: true
+  key:
+    description: A key to use for restoring and saving the files
+    required: true
+  restore-keys:
+    description: An ordered list of keys to use for restoring the files
+    required: false
+  bucket-name:
+    description: Bucket name to save and restore cache files
+    required: true
+  aws-region:
+    description: AWS region of the bucket
+    required: false
+  aws-access-key-id:
+    description: AWS access key ID to access the bucket
+    required: false
+  aws-secret-access-key:
+    description: AWS secret access key to access the bucket
+    required: false
+  aws-session-token:
+    description: AWS session token to access the bucket
+    required: false
+outputs:
+  cache-hit:
+    description: A boolean value indicating whether the cache hit with the key or not
+runs:
+  using: node20
+  main: dist/restore/index.js
+  post: dist/save/index.js
+  post-if: success()
+branding:
+  icon: archive
+  color: gray-dark
