@@ -46,6 +46,26 @@ export class S3Client {
     });
   }
 
+  async listObjects(prefix: string): Promise<string[]> {
+    core.debug(`Listing objects from S3 with prefix: ${prefix}`);
+    const command = new s3.ListObjectsV2Command({
+      Bucket: this.bucketName,
+      Prefix: prefix,
+    });
+    const response = await this.client.send(command);
+    if (response.IsTruncated) {
+      core.info(
+        `Too many objects in S3 with prefix ${prefix}, ` +
+          `only ${response.KeyCount} objects will be checked`,
+      );
+    }
+    return (
+      response.Contents?.sort(
+        (x, y) => x.LastModified!.getTime() - y.LastModified!.getTime(),
+      ).map((object) => object.Key!) ?? []
+    );
+  }
+
   async putObject(key: string, stream: fs.ReadStream): Promise<void> {
     core.debug(`Putting object to S3 with key: ${key}`);
     const upload = new Upload({

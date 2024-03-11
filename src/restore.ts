@@ -17,18 +17,39 @@ async function restore() {
 
     try {
       const archive = mktemp(".tar.gz");
-      await new S3Client().getObject(key, fs.createWriteStream(archive));
-      core.debug(`Extracting archive: ${archive}`);
-      await tar.extract({ file: archive });
-      core.saveState(State.CacheMatchedKey, key);
-      core.setOutput(Outputs.CacheHit, "true");
-      core.info(`Cache restored from S3 with key: ${key}`);
+      let matchedKey: string | undefined;
+      try {
+        await new S3Client().getObject(key, fs.createWriteStream(archive));
+        matchedKey = key;
+      } catch (error: unknown) {
+        if (!(error instanceof s3.NoSuchKey)) {
+          throw error;
+        }
+        core.info(`Cache not found in S3 with key: ${key}`);
+        for (const restoreKey of restoreKeys) {
+          const matchedKeys = await new S3Client().listObjects(restoreKey);
+          if (matchedKeys.length === 0) {
+            core.info(`Cache not found in S3 with restore key: ${restoreKey}`);
+            continue;
+          }
+          core.debug(`Matched keys: ${matchedKeys.join(", ")}`);
+          await new S3Client().getObject(
+            matchedKeys.at(-1)!,
+            fs.createWriteStream(archive),
+          );
+          matchedKey = matchedKeys.at(-1)!;
+          break;
+        }
+      }
+      if (matchedKey) {
+        core.debug(`Extracting archive: ${archive}`);
+        await tar.extract({ file: archive });
+        core.saveState(State.CacheMatchedKey, matchedKey);
+        core.setOutput(Outputs.CacheHit, matchedKey === key);
+        core.info(`Cache restored from S3 with key: ${matchedKey}`);
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        if (error instanceof s3.NoSuchKey) {
-          core.info(`Cache not found in S3 with key: ${key}`);
-          return;
-        }
         core.warning(error.message);
       }
     }
