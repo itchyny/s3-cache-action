@@ -35,9 +35,13 @@ jobs:
         run: npm ci
       - name: Check lint
         run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Check for changes
+        run: git diff --exit-code
 
-  test:
-    name: Test
+  save-files:
+    name: Save files
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -46,12 +50,54 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Create test file
+        run:  date > test-file
       - name: Test action
+        id: cache
         uses: ./
         with:
           path: test-file
-          key: test
+          key: ${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           bucket-name: ${{ vars.BUCKET_NAME }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Check outputs
+        run: test -z "${{ steps.cache.outputs.cache-hit }}" 
+      - name: Upload test file
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-test-file
+          path: test-file
+          retention-days: 1
+
+  restore-files:
+    name: Restore files
+    needs: save-files
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download test file
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.os }}-test-file
+          path: orig-file
+      - name: Test action
+        id: cache
+        uses: ./
+        with:
+          path: test-file
+          key: ${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          bucket-name: ${{ vars.BUCKET_NAME }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Check outputs
+        run: test "${{ steps.cache.outputs.cache-hit }}" == "true"
+      - name: Compare files
+        run: diff orig-file test-file

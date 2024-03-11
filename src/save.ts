@@ -1,28 +1,35 @@
+import * as fs from "fs";
 import * as core from "@actions/core";
-import { Inputs } from "./constants";
+import { Inputs, State } from "./constants";
+import { S3Client } from "./s3-client";
 
-async function save(): Promise<void> {
+async function save() {
   try {
     const path = core.getInput(Inputs.Path, { required: true });
     const key = core.getInput(Inputs.Key, { required: true });
     const restoreKeys = core.getInput(Inputs.RestoreKeys);
-    const bucketName = core.getInput(Inputs.BucketName, { required: true });
-    const awsRegion = core.getInput(Inputs.AWSRegion, { required: true });
-    const awsAccessKeyId = core.getInput(Inputs.AWSAccessKeyId, {
-      required: true,
-    });
-    const awsSecretAccessKey = core.getInput(Inputs.AWSSecretAccessKey, {
-      required: true,
-    });
     core.debug(`${Inputs.Path}: ${path}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys}`);
-    core.debug(`${Inputs.BucketName}: ${bucketName}`);
-    core.debug(`${Inputs.AWSRegion}: ${awsRegion}`);
-    core.debug(`${Inputs.AWSAccessKeyId}: ${awsAccessKeyId.replace(/.*/g, "***")}`);
-    core.debug(`${Inputs.AWSSecretAccessKey}: ${awsSecretAccessKey.replace(/.*/g, "***")}`);
+
+    const restoredKey = core.getState(State.CacheMatchedKey);
+    if (restoredKey === key) {
+      core.info(`Cache restored from S3 with key ${key}, not saving cache.`);
+      return;
+    }
+
+    const client = new S3Client();
+    const stream = fs.createReadStream(path);
+    try {
+      await client.putObject(key, stream);
+      core.info(`Cache saved to S3 with key: ${key}`);
+    } finally {
+      stream.destroy();
+    }
   } catch (error: unknown) {
-    core.setFailed((error as Error).message);
+    if (error instanceof Error) {
+      core.setFailed(error.message);
+    }
   }
 }
 
