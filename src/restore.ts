@@ -1,23 +1,25 @@
 import * as fs from "fs";
+import * as tar from "tar";
 import * as core from "@actions/core";
 import * as s3 from "@aws-sdk/client-s3";
 import { Inputs, Outputs, State } from "./constants";
 import { S3Client } from "./s3-client";
+import { split, mktemp } from "./util";
 
 async function restore() {
   try {
-    const path = core.getInput(Inputs.Path, { required: true });
+    const path = split(core.getInput(Inputs.Path, { required: true }));
     const key = core.getInput(Inputs.Key, { required: true });
-    const restoreKeys = core.getInput(Inputs.RestoreKeys);
-    core.debug(`${Inputs.Path}: ${path}`);
+    const restoreKeys = split(core.getInput(Inputs.RestoreKeys));
+    core.debug(`${Inputs.Path}: ${path.join(", ")}`);
     core.debug(`${Inputs.Key}: ${key}`);
-    core.debug(`${Inputs.RestoreKeys}: ${restoreKeys}`);
+    core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
 
-    const client = new S3Client();
-    const stream = fs.createWriteStream(`${path}.tmp`);
     try {
-      await client.getObject(key, stream);
-      fs.renameSync(`${path}.tmp`, path);
+      const archive = mktemp(".tar.gz");
+      await new S3Client().getObject(key, fs.createWriteStream(archive));
+      core.debug(`Extracting archive: ${archive}`);
+      await tar.extract({ file: archive });
       core.saveState(State.CacheMatchedKey, key);
       core.setOutput(Outputs.CacheHit, "true");
       core.info(`Cache restored from S3 with key: ${key}`);
@@ -28,11 +30,6 @@ async function restore() {
           return;
         }
         core.warning(error.message);
-      }
-    } finally {
-      stream.destroy();
-      if (fs.existsSync(`${path}.tmp`)) {
-        fs.unlinkSync(`${path}.tmp`);
       }
     }
   } catch (error: unknown) {
