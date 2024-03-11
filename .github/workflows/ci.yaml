@@ -50,13 +50,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Create test file
-        run:  date > test-file
+      - name: Create test files
+        run:  |
+          mkdir test-dir
+          for i in {1..3}; do
+            echo "$RANDOM" > "test-$i"
+            echo "$RANDOM" > "test-dir/test-$i"
+          done
       - name: Test action
         id: cache
         uses: ./
         with:
-          path: test-file
+          path: |
+            test-1
+            test-2
+            test-3
+            test-dir
           key: ${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           bucket-name: ${{ vars.BUCKET_NAME }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -67,8 +76,8 @@ jobs:
       - name: Upload test file
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-test-file
-          path: test-file
+          name: ${{ matrix.os }}-test-files
+          path: test-*
           retention-days: 1
 
   restore-files:
@@ -85,13 +94,17 @@ jobs:
       - name: Download test file
         uses: actions/download-artifact@v4
         with:
-          name: ${{ matrix.os }}-test-file
-          path: orig-file
+          name: ${{ matrix.os }}-test-files
+          path: original
       - name: Test action
         id: cache
         uses: ./
         with:
-          path: test-file
+          path: |
+            test-1
+            test-2
+            test-3
+            test-dir
           key: ${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           bucket-name: ${{ vars.BUCKET_NAME }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -100,4 +113,7 @@ jobs:
       - name: Check outputs
         run: test "${{ steps.cache.outputs.cache-hit }}" == "true"
       - name: Compare files
-        run: diff orig-file test-file
+        run: |
+          mkdir restored
+          mv test-* restored
+          diff -r original restored
