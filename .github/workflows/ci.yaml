@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - portable
     tags:
       - v*
   pull_request:
