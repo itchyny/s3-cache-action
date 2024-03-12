@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as tar from "tar";
+import * as glob from "@actions/glob";
 import * as core from "@actions/core";
 import { Inputs, State } from "./constants";
 import { S3Client } from "./s3-client";
@@ -7,10 +8,10 @@ import { split, mktemp } from "./util";
 
 async function save() {
   try {
-    const path = split(core.getInput(Inputs.Path, { required: true }));
+    const path = core.getInput(Inputs.Path, { required: true });
     const key = core.getInput(Inputs.Key, { required: true });
     const restoreKeys = split(core.getInput(Inputs.RestoreKeys));
-    core.debug(`${Inputs.Path}: ${path.join(", ")}`);
+    core.debug(`${Inputs.Path}: ${path}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
 
@@ -20,9 +21,10 @@ async function save() {
       return;
     }
 
+    const paths = await glob.create(path).then((globber) => globber.glob());
     const archive = mktemp(".tar.gz");
     core.debug(`Creating archive: ${archive}`);
-    await tar.create({ file: archive, gzip: true }, path);
+    await tar.create({ file: archive, gzip: true, preservePaths: true }, paths);
     await new S3Client().putObject(key, fs.createReadStream(archive));
     core.info(`Cache saved to S3 with key: ${key}`);
   } catch (error: unknown) {
