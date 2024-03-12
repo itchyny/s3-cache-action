@@ -8,10 +8,10 @@ import { split, mktemp } from "./util";
 
 async function restore() {
   try {
-    const path = split(core.getInput(Inputs.Path, { required: true }));
+    const path = core.getInput(Inputs.Path, { required: true });
     const key = core.getInput(Inputs.Key, { required: true });
     const restoreKeys = split(core.getInput(Inputs.RestoreKeys));
-    core.debug(`${Inputs.Path}: ${path.join(", ")}`);
+    core.debug(`${Inputs.Path}: ${path}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
 
@@ -43,7 +43,8 @@ async function restore() {
       }
       if (matchedKey) {
         core.debug(`Extracting archive: ${archive}`);
-        await tar.extract({ file: archive });
+        // @ts-expect-error: `preservePaths` is missing
+        await tar.extract({ file: archive, preservePaths: true });
         core.saveState(State.CacheMatchedKey, matchedKey);
         core.setOutput(Outputs.CacheHit, matchedKey === key);
         core.info(`Cache restored from S3 with key: ${matchedKey}`);
