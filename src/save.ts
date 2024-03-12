@@ -1,10 +1,15 @@
 import * as fs from "fs";
-import * as tar from "tar";
+import { join } from "path";
 import * as glob from "@actions/glob";
 import * as core from "@actions/core";
+import * as tar from "@actions/cache/lib/internal/tar";
+import { createTempDirectory } from "@actions/cache/lib/internal/cacheUtils";
+import {
+  CacheFilename,
+  CompressionMethod,
+} from "@actions/cache/lib/internal/constants";
 import { Inputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { mktemp } from "./util";
 
 async function save() {
   try {
@@ -20,9 +25,10 @@ async function save() {
     }
 
     const paths = await glob.create(path).then((globber) => globber.glob());
-    const archive = mktemp(".tar.gz");
+    const dir = await createTempDirectory();
+    const archive = join(dir, CacheFilename.Gzip);
     core.debug(`Creating archive: ${archive}`);
-    await tar.create({ file: archive, gzip: true, preservePaths: true }, paths);
+    await tar.createTar(dir, paths, CompressionMethod.Gzip);
     await new S3Client().putObject(key, fs.createReadStream(archive));
     core.info(`Cache saved to S3 with key: ${key}`);
   } catch (error: unknown) {

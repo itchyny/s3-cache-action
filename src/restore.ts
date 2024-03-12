@@ -1,23 +1,33 @@
 import * as fs from "fs";
-import * as tar from "tar";
+import { join } from "path";
 import * as core from "@actions/core";
 import * as s3 from "@aws-sdk/client-s3";
+import * as tar from "@actions/cache/lib/internal/tar";
+import {
+  CacheFilename,
+  CompressionMethod,
+} from "@actions/cache/lib/internal/constants";
+import { createTempDirectory } from "@actions/cache/lib/internal/cacheUtils";
 import { Inputs, Outputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { split, mktemp } from "./util";
 
 async function restore() {
   try {
     const path = core.getInput(Inputs.Path, { required: true });
     const key = core.getInput(Inputs.Key, { required: true });
-    const restoreKeys = split(core.getInput(Inputs.RestoreKeys));
+    const restoreKeys = core
+      .getInput(Inputs.RestoreKeys)
+      .split("\n")
+      .map((s) => s.trim())
+      .filter((s) => s !== "");
     core.debug(`${Inputs.Path}: ${path}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
     core.saveState(State.CacheKey, key);
 
     try {
-      const archive = mktemp(".tar.gz");
+      const dir = await createTempDirectory();
+      const archive = join(dir, CacheFilename.Gzip);
       let matchedKey: string | undefined;
       try {
         await new S3Client().getObject(key, fs.createWriteStream(archive));
@@ -44,8 +54,7 @@ async function restore() {
       }
       if (matchedKey) {
         core.debug(`Extracting archive: ${archive}`);
-        // @ts-expect-error: `preservePaths` is missing
-        await tar.extract({ file: archive, preservePaths: true });
+        await tar.extractTar(archive, CompressionMethod.Gzip);
         core.saveState(State.CacheMatchedKey, matchedKey);
         core.setOutput(Outputs.CacheHit, matchedKey === key);
         core.info(`Cache restored from S3 with key: ${matchedKey}`);
