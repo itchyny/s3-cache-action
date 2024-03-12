@@ -46,6 +46,23 @@ export class S3Client {
     });
   }
 
+  async headObject(key: string): Promise<boolean> {
+    core.debug(`Heading object from S3 with key: ${key}`);
+    const command = new s3.HeadObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+    try {
+      await this.client.send(command);
+      return true;
+    } catch (error: unknown) {
+      if (error instanceof s3.NotFound) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
   async listObjects(prefix: string): Promise<string[]> {
     core.debug(`Listing objects from S3 with prefix: ${prefix}`);
     const command = new s3.ListObjectsV2Command({

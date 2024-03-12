@@ -17,10 +17,11 @@ async function restore() {
     core.saveState(State.CacheKey, key);
 
     try {
+      const client = new S3Client();
       const archive = mktemp(".tar.gz");
       let matchedKey: string | undefined;
       try {
-        await new S3Client().getObject(key, fs.createWriteStream(archive));
+        await client.getObject(key, fs.createWriteStream(archive));
         matchedKey = key;
       } catch (error: unknown) {
         if (!(error instanceof s3.NoSuchKey)) {
@@ -28,13 +29,13 @@ async function restore() {
         }
         core.info(`Cache not found in S3 with key: ${key}`);
         for (const restoreKey of restoreKeys) {
-          const matchedKeys = await new S3Client().listObjects(restoreKey);
+          const matchedKeys = await client.listObjects(restoreKey);
           if (matchedKeys.length === 0) {
             core.info(`Cache not found in S3 with restore key: ${restoreKey}`);
             continue;
           }
           core.debug(`Matched keys: ${matchedKeys.join(", ")}`);
-          await new S3Client().getObject(
+          await client.getObject(
             matchedKeys.at(-1)!,
             fs.createWriteStream(archive),
           );
@@ -52,12 +53,12 @@ async function restore() {
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        core.warning(error.message);
+        core.warning(error);
       }
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      core.setFailed(error.message);
+      core.setFailed(error);
     }
   }
 }
