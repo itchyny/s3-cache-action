@@ -14,6 +14,7 @@ async function restore() {
     core.debug(`${Inputs.Path}: ${path}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
+    core.saveState(State.CacheKey, key);
 
     try {
       const archive = mktemp(".tar.gz");

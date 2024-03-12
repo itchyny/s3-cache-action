@@ -14,5 +14,13 @@ export enum Outputs {
 }
 
 export enum State {
+  CacheKey = "CACHE_KEY",
   CacheMatchedKey = "CACHE_MATCHED_KEY",
+}
+
+export enum Env {
+  AWSRegion = "AWS_REGION",
+  AWSAccessKeyId = "AWS_ACCESS_KEY_ID",
+  AWSSecretAccessKey = "AWS_SECRET_ACCESS_KEY",
+  AWSSessionToken = "AWS_SESSION_TOKEN",
 }

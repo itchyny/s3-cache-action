@@ -3,32 +3,32 @@ import * as fs from "fs";
 import * as s3 from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Readable } from "stream";
-import { Inputs } from "./constants";
+import { Inputs, Env } from "./constants";
 
 export class S3Client {
   private readonly client: s3.S3Client;
   private readonly bucketName: string;
 
   constructor() {
-    const region =
-      core.getInput(Inputs.AWSRegion) || process.env["AWS_REGION"] || "";
-    const accessKeyId =
-      core.getInput(Inputs.AWSAccessKeyId) ||
-      process.env["AWS_ACCESS_KEY_ID"] ||
-      "";
-    const secretAccessKey =
-      core.getInput(Inputs.AWSSecretAccessKey) ||
-      process.env["AWS_SECRET_ACCESS_KEY"] ||
-      "";
-    const sessionToken =
-      core.getInput(Inputs.AWSSessionToken) ||
-      process.env["AWS_SESSION_TOKEN"] ||
-      "";
+    const region = S3Client.getInput("AWSRegion");
+    const accessKeyId = S3Client.getInput("AWSAccessKeyId");
+    const secretAccessKey = S3Client.getInput("AWSSecretAccessKey");
+    const sessionToken = S3Client.getInput("AWSSessionToken");
     this.client = new s3.S3Client({
       region,
       credentials: { accessKeyId, secretAccessKey, sessionToken },
     });
     this.bucketName = core.getInput(Inputs.BucketName, { required: true });
+  }
+
+  private static getInput(key: keyof typeof Inputs & keyof typeof Env): string {
+    const value =
+      core.getState(Env[key]) ||
+      core.getInput(Inputs[key]) ||
+      process.env[Env[key]] ||
+      "";
+    core.saveState(Env[key], value);
+    return value;
   }
 
   async getObject(key: string, stream: fs.WriteStream): Promise<void> {

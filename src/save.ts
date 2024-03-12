@@ -4,16 +4,14 @@ import * as glob from "@actions/glob";
 import * as core from "@actions/core";
 import { Inputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { split, mktemp } from "./util";
+import { mktemp } from "./util";
 
 async function save() {
   try {
     const path = core.getInput(Inputs.Path, { required: true });
-    const key = core.getInput(Inputs.Key, { required: true });
-    const restoreKeys = split(core.getInput(Inputs.RestoreKeys));
+    const key = core.getState(State.CacheKey) || core.getInput(Inputs.Key);
     core.debug(`${Inputs.Path}: ${path}`);
     core.debug(`${Inputs.Key}: ${key}`);
-    core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
 
     const restoredKey = core.getState(State.CacheMatchedKey);
     if (restoredKey === key) {
