@@ -27,9 +27,13 @@ async function save() {
     const paths = await glob
       .create(path, { implicitDescendants: false })
       .then((globber) => globber.glob());
-    const archive = mktemp(".tar.gz");
+    const archive = mktemp(".tar.br");
     core.debug(`Creating archive: ${archive}`);
-    await tar.create({ file: archive, gzip: true, preservePaths: true }, paths);
+    // @ts-expect-error: `brotli` is missing
+    await tar.create(
+      { file: archive, brotli: true, preservePaths: true },
+      paths,
+    );
     await client.putObject(key, fs.createReadStream(archive));
     core.info(`Cache saved to S3 with key: ${key}`);
   } catch (error: unknown) {

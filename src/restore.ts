@@ -18,7 +18,7 @@ async function restore() {
 
     try {
       const client = new S3Client();
-      const archive = mktemp(".tar.gz");
+      const archive = mktemp(".tar.br");
       let matchedKey: string | undefined;
       try {
         await client.getObject(key, fs.createWriteStream(archive));
