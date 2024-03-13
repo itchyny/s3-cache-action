@@ -24,7 +24,9 @@ async function save() {
       core.info(`Cache found in S3 with key ${key}, not saving cache.`);
       return;
     }
-    const paths = await glob.create(path).then((globber) => globber.glob());
+    const paths = await glob
+      .create(path, { implicitDescendants: false })
+      .then((globber) => globber.glob());
     const archive = mktemp(".tar.gz");
     core.debug(`Creating archive: ${archive}`);
     await tar.create({ file: archive, gzip: true, preservePaths: true }, paths);
