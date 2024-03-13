@@ -1,10 +1,11 @@
-import * as fs from "fs";
-import * as tar from "tar";
 import * as core from "@actions/core";
 import * as s3 from "@aws-sdk/client-s3";
+import * as fs from "fs";
+import * as tar from "tar";
+
 import { Inputs, Outputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { split, mktemp } from "./util";
+import { mktemp, split } from "./util";
 
 async function restore() {
   try {

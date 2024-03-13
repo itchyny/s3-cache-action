@@ -1,7 +1,8 @@
+import * as core from "@actions/core";
+import * as glob from "@actions/glob";
 import * as fs from "fs";
 import * as tar from "tar";
-import * as glob from "@actions/glob";
-import * as core from "@actions/core";
+
 import { Inputs, State } from "./constants";
 import { S3Client } from "./s3-client";
 import { mktemp } from "./util";

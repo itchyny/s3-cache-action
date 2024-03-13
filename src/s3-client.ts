@@ -1,9 +1,10 @@
 import * as core from "@actions/core";
-import * as fs from "fs";
 import * as s3 from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import * as fs from "fs";
 import { Readable } from "stream";
-import { Inputs, Env } from "./constants";
+
+import { Env, Inputs } from "./constants";
 
 export class S3Client {
   private readonly client: s3.S3Client;
