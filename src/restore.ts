@@ -5,7 +5,7 @@ import * as tar from "tar";
 
 import { Inputs, Outputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { mktemp, split } from "./util";
+import { mktemp, size, split } from "./util";
 
 async function restore() {
   try {
@@ -50,7 +50,9 @@ async function restore() {
         await tar.extract({ file: archive, preservePaths: true });
         core.saveState(State.CacheMatchedKey, matchedKey);
         core.setOutput(Outputs.CacheHit, matchedKey === key);
-        core.info(`Cache restored from S3 with key: ${matchedKey}`);
+        core.info(
+          `Cache restored from S3 with key: ${matchedKey}, size: ${size(archive)} bytes`,
+        );
       }
     } catch (error: unknown) {
       if (error instanceof Error) {

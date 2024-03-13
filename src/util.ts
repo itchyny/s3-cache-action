@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as tmp from "tmp";
 
 export function split(str: string): string[] {
@@ -10,4 +11,8 @@ export function split(str: string): string[] {
 export function mktemp(suffix: string): string {
   tmp.setGracefulCleanup();
   return tmp.tmpNameSync({ postfix: suffix });
+}
+
+export function size(file: string): number {
+  return fs.statSync(file).size;
 }

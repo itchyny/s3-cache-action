@@ -5,7 +5,7 @@ import * as tar from "tar";
 
 import { Inputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { mktemp } from "./util";
+import { mktemp, size } from "./util";
 
 async function save() {
   try {
@@ -32,7 +32,9 @@ async function save() {
     core.debug(`Creating archive: ${archive}`);
     await tar.create({ file: archive, gzip: true, preservePaths: true }, paths);
     await client.putObject(key, fs.createReadStream(archive));
-    core.info(`Cache saved to S3 with key: ${key}`);
+    core.info(
+      `Cache saved to S3 with key: ${key}, size: ${size(archive)} bytes`,
+    );
   } catch (error: unknown) {
     if (error instanceof Error) {
       core.setFailed(error);
