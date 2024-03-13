@@ -82,8 +82,8 @@ export class S3Client {
       );
     }
     return (
-      response.Contents?.sort(
-        (x, y) => x.LastModified!.getTime() - y.LastModified!.getTime(),
+      response.Contents?.sort((x, y) =>
+        x.LastModified!.getTime() < y.LastModified!.getTime() ? 1 : -1,
       ).map((object) => object.Key!) ?? []
     );
   }

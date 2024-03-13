@@ -23,18 +23,14 @@ async function restore() {
       matchedKey = key;
     } else {
       core.info(`Cache not found in S3 with key: ${key}`);
-      for (const restoreKey of restoreKeys) {
-        const matchedKeys = await client.listObjects(restoreKey);
-        if (matchedKeys.length === 0) {
-          core.info(`Cache not found in S3 with restore key: ${restoreKey}`);
-          continue;
+      L: for (const restoreKey of restoreKeys) {
+        for (const key of await client.listObjects(restoreKey)) {
+          if (await client.getObject(key, fs.createWriteStream(archive))) {
+            matchedKey = key;
+            break L;
+          }
         }
-        core.debug(`Matched keys: ${matchedKeys.join(", ")}`);
-        const key = matchedKeys.at(-1)!;
-        if (await client.getObject(key, fs.createWriteStream(archive))) {
-          matchedKey = key;
-          break;
-        }
+        core.info(`Cache not found in S3 with restore key: ${restoreKey}`);
       }
     }
 
