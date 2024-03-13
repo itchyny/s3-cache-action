@@ -5,7 +5,7 @@ import * as tar from "tar";
 
 import { Inputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { mktemp, size } from "./util";
+import { mktemp, size } from "./utils";
 
 async function save() {
   try {
