@@ -3,6 +3,7 @@ import * as s3 from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import * as fs from "fs";
 import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 
 import { Env, Inputs } from "./constants";
 
@@ -32,19 +33,22 @@ export class S3Client {
     return value;
   }
 
-  async getObject(key: string, stream: fs.WriteStream): Promise<void> {
+  async getObject(key: string, stream: fs.WriteStream): Promise<boolean> {
     core.debug(`Getting object from S3 with key: ${key}`);
     const command = new s3.GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
     });
-    const response = await this.client.send(command);
-    return new Promise<void>((resolve, reject) => {
-      (response.Body! as Readable)
-        .pipe(stream)
-        .on("error", (err) => reject(err))
-        .on("close", () => resolve());
-    });
+    try {
+      const response = await this.client.send(command);
+      await pipeline(response.Body! as Readable, stream);
+      return true;
+    } catch (error: unknown) {
+      if (error instanceof s3.NoSuchKey) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   async headObject(key: string): Promise<boolean> {
@@ -93,6 +97,6 @@ export class S3Client {
     upload.on("httpUploadProgress", ({ loaded, total }) => {
       core.debug(`Uploaded ${loaded} of ${total} bytes`);
     });
-    return upload.done().then(() => {});
+    await upload.done();
   }
 }
