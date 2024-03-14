@@ -5,7 +5,7 @@ export function split(str: string): string[] {
   return str
     .split("\n")
     .map((s) => s.trim())
-    .filter((s) => s !== "");
+    .filter((s) => s !== "" && !s.startsWith("#"));
 }
 
 export function mktemp(postfix: string): string {

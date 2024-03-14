@@ -5,13 +5,13 @@ import * as tar from "tar";
 
 import { Inputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { mktemp, size } from "./utils";
+import { mktemp, size, split } from "./utils";
 
 async function save() {
   try {
-    const path = core.getInput(Inputs.Path, { required: true });
+    const path = split(core.getInput(Inputs.Path, { required: true }));
     const key = core.getState(State.CacheKey) || core.getInput(Inputs.Key);
-    core.debug(`${Inputs.Path}: ${path}`);
+    core.debug(`${Inputs.Path}: ${path.join(", ")}`);
     core.debug(`${Inputs.Key}: ${key}`);
 
     const restoredKey = core.getState(State.CacheMatchedKey);
@@ -27,7 +27,7 @@ async function save() {
     }
 
     const paths = await glob
-      .create(path, { implicitDescendants: false })
+      .create(path.join("\n"), { implicitDescendants: false })
       .then((globber) => globber.glob());
     const archive = mktemp(".tar.gz");
     core.debug(`Creating archive: ${archive}`);

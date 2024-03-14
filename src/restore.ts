@@ -8,10 +8,10 @@ import { mktemp, size, split } from "./utils";
 
 async function restore() {
   try {
-    const path = core.getInput(Inputs.Path, { required: true });
+    const path = split(core.getInput(Inputs.Path, { required: true }));
     const key = core.getInput(Inputs.Key, { required: true });
     const restoreKeys = split(core.getInput(Inputs.RestoreKeys));
-    core.debug(`${Inputs.Path}: ${path}`);
+    core.debug(`${Inputs.Path}: ${path.join(", ")}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
     core.saveState(State.CacheKey, key);
