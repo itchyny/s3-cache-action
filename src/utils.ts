@@ -8,9 +8,9 @@ export function split(str: string): string[] {
     .filter((s) => s !== "");
 }
 
-export function mktemp(suffix: string): string {
-  tmp.setGracefulCleanup();
-  return tmp.tmpNameSync({ postfix: suffix });
+export function mktemp(postfix: string): string {
+  const tmpdir = process.env.RUNNER_TEMP || "";
+  return tmp.tmpNameSync({ tmpdir, postfix });
 }
 
 export function size(file: string): number {
