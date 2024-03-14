@@ -25,6 +25,7 @@ async function save() {
       core.info(`Cache found in S3 with key ${key}, not saving cache.`);
       return;
     }
+
     const paths = await glob
       .create(path, { implicitDescendants: false })
       .then((globber) => globber.glob());
@@ -32,9 +33,7 @@ async function save() {
     core.debug(`Creating archive: ${archive}`);
     await tar.create({ file: archive, gzip: true, preservePaths: true }, paths);
     await client.putObject(key, fs.createReadStream(archive));
-    core.info(
-      `Cache saved to S3 with key: ${key}, size: ${size(archive)} bytes`,
-    );
+    core.info(`Cache saved to S3 with key ${key}, ${size(archive)} bytes.`);
   } catch (error: unknown) {
     if (error instanceof Error) {
       core.setFailed(error);

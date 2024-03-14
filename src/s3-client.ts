@@ -78,7 +78,7 @@ export class S3Client {
     if (response.IsTruncated) {
       core.info(
         `Too many objects in S3 with prefix ${prefix}, ` +
-          `only ${response.KeyCount} objects will be checked`,
+          `only ${response.KeyCount} objects will be checked.`,
       );
     }
     return (

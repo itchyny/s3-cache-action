@@ -22,7 +22,7 @@ async function restore() {
     if (await client.getObject(key, fs.createWriteStream(archive))) {
       matchedKey = key;
     } else {
-      core.info(`Cache not found in S3 with key: ${key}`);
+      core.info(`Cache not found in S3 with key ${key}.`);
       L: for (const restoreKey of restoreKeys) {
         for (const key of await client.listObjects(restoreKey)) {
           if (await client.getObject(key, fs.createWriteStream(archive))) {
@@ -30,7 +30,7 @@ async function restore() {
             break L;
           }
         }
-        core.info(`Cache not found in S3 with restore key: ${restoreKey}`);
+        core.info(`Cache not found in S3 with restore key ${restoreKey}.`);
       }
     }
 
@@ -41,7 +41,7 @@ async function restore() {
       core.saveState(State.CacheMatchedKey, matchedKey);
       core.setOutput(Outputs.CacheHit, matchedKey === key);
       core.info(
-        `Cache restored from S3 with key: ${matchedKey}, size: ${size(archive)} bytes`,
+        `Cache restored from S3 with key ${matchedKey}, ${size(archive)} bytes.`,
       );
     }
   } catch (error: unknown) {
