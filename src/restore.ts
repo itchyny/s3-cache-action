@@ -4,13 +4,13 @@ import * as tar from "tar";
 
 import { Inputs, Outputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { hash, mktemp, size, split } from "./utils";
+import { archivePath, fileName, fileSize, splitInput } from "./utils";
 
 async function restore() {
   try {
-    const path = split(core.getInput(Inputs.Path, { required: true }));
+    const path = splitInput(core.getInput(Inputs.Path, { required: true }));
     const key = core.getInput(Inputs.Key, { required: true });
-    const restoreKeys = split(core.getInput(Inputs.RestoreKeys));
+    const restoreKeys = splitInput(core.getInput(Inputs.RestoreKeys));
     core.debug(`${Inputs.Path}: ${path.join(", ")}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
@@ -18,8 +18,8 @@ async function restore() {
     core.saveState(State.CacheKey, key);
 
     const client = new S3Client();
-    const file = `${hash(path.join("\n"))}.tar.gz`;
-    const archive = mktemp(".tar.gz");
+    const file = fileName(path);
+    const archive = archivePath();
     let matchedKey: string | undefined;
     if (await client.getObject(key, file, fs.createWriteStream(archive))) {
       matchedKey = key;
@@ -42,7 +42,7 @@ async function restore() {
       await tar.extract({ file: archive, preservePaths: true });
       core.saveState(State.CacheMatchedKey, matchedKey);
       core.setOutput(Outputs.CacheHit, matchedKey === key);
-      core.info(`Cache restored from S3 with key ${matchedKey}, ${size(archive)} bytes.`);
+      core.info(`Cache restored from S3 with key ${matchedKey}, ${fileSize(archive)} bytes.`);
     }
   } catch (error: unknown) {
     if (error instanceof Error) {

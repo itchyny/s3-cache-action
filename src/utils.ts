@@ -2,22 +2,23 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
-export function split(str: string): string[] {
+export function splitInput(str: string): string[] {
   return str
     .split("\n")
     .map((s) => s.trim())
     .filter((s) => s !== "" && !s.startsWith("#"));
 }
 
-export function hash(data: string): string {
-  return crypto.createHash("md5").update(data).digest("hex");
+export function fileName(path: string[]): string {
+  const hash = crypto.createHash("md5").update(path.join("\n")).digest("hex");
+  return `${hash}.tar.gz`;
 }
 
-export function mktemp(postfix: string): string {
+export function archivePath(): string {
   const tmpdir = process.env.RUNNER_TEMP || "";
-  return tmp.tmpNameSync({ tmpdir, postfix });
+  return tmp.tmpNameSync({ tmpdir, postfix: ".tar.gz" });
 }
 
-export function size(file: string): number {
+export function fileSize(file: string): number {
   return fs.statSync(file).size;
 }
