@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 defaults:
   run:
@@ -91,6 +92,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Login AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Test action
         id: cache
         uses: ./
@@ -101,9 +108,6 @@ jobs:
             ~/test-file
           key: ${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           bucket-name: ${{ vars.BUCKET_NAME }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Check outputs
         run: test "${{ steps.cache.outputs.cache-hit }}" == "true"
       - name: Download test file
@@ -129,8 +133,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
       - name: Test action
         id: cache
         uses: ./
@@ -168,8 +171,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
       - name: Test action
         id: cache
         uses: ./

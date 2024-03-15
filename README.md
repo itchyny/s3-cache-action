@@ -23,8 +23,7 @@ You can also use [aws-actions/configure-aws-credentials](https://github.com/aws-
 - uses: aws-actions/configure-aws-credentials@v4
   with:
     aws-region: ${{ vars.S3_CACHE_AWS_REGION }}
-    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    role-to-assume: ${{ vars.S3_CACHE_ASSUME_ROLE_ARN }}
 - uses: itchyny/s3-cache-action@v1
   with:
     path: ~/.npm
