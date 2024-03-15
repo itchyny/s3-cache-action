@@ -1,3 +1,4 @@
+import * as crypto from "crypto";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
@@ -6,6 +7,10 @@ export function split(str: string): string[] {
     .split("\n")
     .map((s) => s.trim())
     .filter((s) => s !== "" && !s.startsWith("#"));
+}
+
+export function hash(data: string): string {
+  return crypto.createHash("md5").update(data).digest("hex");
 }
 
 export function mktemp(postfix: string): string {

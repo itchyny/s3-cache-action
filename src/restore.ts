@@ -4,7 +4,7 @@ import * as tar from "tar";
 
 import { Inputs, Outputs, State } from "./constants";
 import { S3Client } from "./s3-client";
-import { mktemp, size, split } from "./utils";
+import { hash, mktemp, size, split } from "./utils";
 
 async function restore() {
   try {
@@ -14,18 +14,20 @@ async function restore() {
     core.debug(`${Inputs.Path}: ${path.join(", ")}`);
     core.debug(`${Inputs.Key}: ${key}`);
     core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
+    core.saveState(State.CachePath, path.join("\n"));
     core.saveState(State.CacheKey, key);
 
     const client = new S3Client();
+    const file = `${hash(path.join("\n"))}.tar.gz`;
     const archive = mktemp(".tar.gz");
     let matchedKey: string | undefined;
-    if (await client.getObject(key, fs.createWriteStream(archive))) {
+    if (await client.getObject(key, file, fs.createWriteStream(archive))) {
       matchedKey = key;
     } else {
       core.info(`Cache not found in S3 with key ${key}.`);
       L: for (const restoreKey of restoreKeys) {
-        for (const key of await client.listObjects(restoreKey)) {
-          if (await client.getObject(key, fs.createWriteStream(archive))) {
+        for (const key of await client.listObjects(restoreKey, file)) {
+          if (await client.getObject(key, file, fs.createWriteStream(archive))) {
             matchedKey = key;
             break L;
           }
@@ -35,14 +37,12 @@ async function restore() {
     }
 
     if (matchedKey) {
-      core.debug(`Extracting archive: ${archive}`);
+      core.debug(`Extracting archive ${archive}.`);
       // @ts-expect-error: `preservePaths` is missing
       await tar.extract({ file: archive, preservePaths: true });
       core.saveState(State.CacheMatchedKey, matchedKey);
       core.setOutput(Outputs.CacheHit, matchedKey === key);
-      core.info(
-        `Cache restored from S3 with key ${matchedKey}, ${size(archive)} bytes.`,
-      );
+      core.info(`Cache restored from S3 with key ${matchedKey}, ${size(archive)} bytes.`);
     }
   } catch (error: unknown) {
     if (error instanceof Error) {

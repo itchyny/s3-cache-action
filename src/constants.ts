@@ -21,6 +21,7 @@ export enum Outputs {
 }
 
 export enum State {
+  CachePath = "CACHE_PATH",
   CacheKey = "CACHE_KEY",
   CacheMatchedKey = "CACHE_MATCHED_KEY",
 }
