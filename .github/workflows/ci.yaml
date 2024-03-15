@@ -188,3 +188,21 @@ jobs:
           fi
       - name: Create test file
         run: echo "${{ github.run_id }}" > ~/test-file
+
+  release:
+    name: Release
+    needs: [lint, restore-files, restore-keys, different-path]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup release body
+        run: sed -n '/\[${{ github.ref_name }}\]/,/^$/{//!p}' CHANGELOG.md >release-body.txt
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          bodyFile: release-body.txt
