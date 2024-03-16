@@ -176,7 +176,7 @@ jobs:
         id: cache
         uses: ./
         with:
-          path: ~/test-file
+          path: ~/test-file-${{ github.run_attempt }}
           key: ${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ${{ runner.os }}-${{ github.run_id }}-
@@ -185,11 +185,11 @@ jobs:
         run: test -z "${{ steps.cache.outputs.cache-hit }}" 
       - name: Check file does not exist
         run: |
-          if [[ -f ~/test-file ]]; then
+          if [[ -f ~/test-file-${{ github.run_attempt }} ]]; then
             exit 1
           fi
       - name: Create test file
-        run: echo "${{ github.run_id }}" > ~/test-file
+        run: echo "${{ github.run_id }}" > ~/test-file-${{ github.run_attempt }}
 
   release:
     name: Release
