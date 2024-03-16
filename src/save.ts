@@ -11,7 +11,7 @@ async function save() {
   try {
     const path = splitInput(core.getState(State.CachePath) || core.getInput(Inputs.Path));
     const key = core.getState(State.CacheKey) || core.getInput(Inputs.Key);
-    core.debug(`${Inputs.Path}: ${path.join(", ")}`);
+    core.debug(`${Inputs.Path}: [${path.join(", ")}]`);
     core.debug(`${Inputs.Key}: ${key}`);
 
     const restoredKey = core.getState(State.CacheMatchedKey);

@@ -11,9 +11,9 @@ async function restore() {
     const path = splitInput(core.getInput(Inputs.Path, { required: true }));
     const key = core.getInput(Inputs.Key, { required: true });
     const restoreKeys = splitInput(core.getInput(Inputs.RestoreKeys));
-    core.debug(`${Inputs.Path}: ${path.join(", ")}`);
+    core.debug(`${Inputs.Path}: [${path.join(", ")}]`);
     core.debug(`${Inputs.Key}: ${key}`);
-    core.debug(`${Inputs.RestoreKeys}: ${restoreKeys.join(", ")}`);
+    core.debug(`${Inputs.RestoreKeys}: [${restoreKeys.join(", ")}]`);
     core.saveState(State.CachePath, path.join("\n"));
     core.saveState(State.CacheKey, key);
 
