@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as s3 from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import { once } from "events";
 import * as fs from "fs";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
@@ -61,6 +62,11 @@ export class S3Client {
         return false;
       }
       throw error;
+    } finally {
+      if (!stream.closed) {
+        stream.destroy();
+        await once(stream, "close");
+      }
     }
   }
 
