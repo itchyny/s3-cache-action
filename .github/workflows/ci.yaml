@@ -260,6 +260,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org
+          always-auth: true
+          scope: '@itchyny'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Setup release body
         run: sed -n '/\[${{ github.ref_name }}\]/,/^$/{//!p}' CHANGELOG.md >release-body.txt
       - name: Create release
@@ -267,3 +281,5 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           bodyFile: release-body.txt
+      - name: Push major version tag
+        run: git push origin --force "HEAD:refs/tags/${GITHUB_REF_NAME%%.*}"

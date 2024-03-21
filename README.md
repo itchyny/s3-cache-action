@@ -52,6 +52,55 @@ Refer to [action.yaml](https://github.com/itchyny/s3-cache-action/blob/main/acti
 - The action does not provide `fail-on-cache-miss` and `lookup-only` options (yet).
   The action always uses `.tar.gz` archive format for implementation simplicity.
 
+## npm package
+The core implementation of this action is available as an npm package:
+[@itchyny/s3-cache-action](https://www.npmjs.com/package/@itchyny/s3-cache-action).
+
+```sh
+npm install @itchyny/s3-cache-action
+```
+```typescript
+import * as s3 from '@aws-sdk/client-s3';
+import * as cache from '@itchyny/s3-cache-action';
+
+async function main() {
+  const saved = await cache.saveCache(
+    ['*.txt'],
+    'test-key',
+    'bucket-name',
+    new s3.S3Client({
+      region: process.env.AWS_REGION!,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        sessionToken: process.env.AWS_SESSION_TOKEN!,
+      },
+    }),
+  );
+  if (!saved) {
+    console.log('Cache already exists, skip saving.');
+  }
+
+  const matchedKey = await cache.restoreCache(
+    ['*.txt'],
+    'test-key',
+    ['test-'],
+    'bucket-name',
+    new s3.S3Client({
+      region: process.env.AWS_REGION!,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        sessionToken: process.env.AWS_SESSION_TOKEN!,
+      },
+    }),
+  );
+  if (matchedKey) {
+    console.log(`Cache restored with key ${matchedKey}.`);
+  }
+}
+```
+
 ## Bug Tracker
 Report bug at [Issues・itchyny/s3-cache-action - GitHub](https://github.com/itchyny/s3-cache-action/issues).
 

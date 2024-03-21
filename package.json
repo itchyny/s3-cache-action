@@ -1,7 +1,6 @@
 {
-  "name": "s3-cache-action",
+  "name": "@itchyny/s3-cache-action",
   "version": "0.0.0",
-  "private": true,
   "description": "Cache files to Amazon S3",
   "author": "itchyny <itchyny@cybozu.co.jp>",
   "license": "MIT",
@@ -10,18 +9,28 @@
     "type": "git",
     "url": "git+https://github.com/itchyny/s3-cache-action.git"
   },
+  "bugs": {
+    "url": "https://github.com/itchyny/s3-cache-action/issues"
+  },
+  "main": "lib/cache.js",
+  "types": "lib/cache.d.ts",
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
-    "actions",
-    "node",
-    "cache",
     "s3",
-    "aws"
+    "cache",
+    "actions"
   ],
   "scripts": {
-    "build": "tsc && ncc build -m -o dist/restore src/restore.ts && ncc build -m -o dist/save src/save.ts",
+    "build": "ncc build -m -o dist/restore src/restore.ts && ncc build -m -o dist/save src/save.ts",
     "test": "jest --runInBand",
-    "lint": "eslint *.ts **/*.ts",
-    "lint:fix": "eslint --fix *.ts **/*.ts"
+    "lint": "eslint *.ts src/*.ts tests/*.ts",
+    "lint:fix": "eslint --fix *.ts src/*.ts tests/*.ts",
+    "prepublishOnly": "tsc --declaration --sourceMap"
   },
   "dependencies": {
     "@actions/core": "^1.10.1",
