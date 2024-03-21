@@ -6,30 +6,11 @@ import * as fs from "fs";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 
-import { Env, Inputs } from "./constants";
-
-export class S3Client {
-  private readonly client: s3.S3Client;
-  private readonly bucketName: string;
-
-  constructor() {
-    const region = S3Client.getInput("AWSRegion");
-    const accessKeyId = S3Client.getInput("AWSAccessKeyId");
-    const secretAccessKey = S3Client.getInput("AWSSecretAccessKey");
-    const sessionToken = S3Client.getInput("AWSSessionToken");
-    this.client = new s3.S3Client({
-      region,
-      credentials: { accessKeyId, secretAccessKey, sessionToken },
-    });
-    this.bucketName = core.getInput(Inputs.BucketName, { required: true });
-  }
-
-  private static getInput(key: keyof typeof Inputs & keyof typeof Env): string {
-    const value =
-      core.getState(Env[key]) || core.getInput(Inputs[key]) || process.env[Env[key]] || "";
-    core.saveState(Env[key], value);
-    return value;
-  }
+export class Client {
+  constructor(
+    private readonly bucketName: string,
+    private readonly client: s3.S3Client,
+  ) {}
 
   private static joinKey(key: string, file: string): string {
     return `${key}/${file}`;
@@ -51,7 +32,7 @@ export class S3Client {
     core.debug(`Getting object from S3 with key ${key}, file ${file}.`);
     const command = new s3.GetObjectCommand({
       Bucket: this.bucketName,
-      Key: S3Client.joinKey(key, file),
+      Key: Client.joinKey(key, file),
     });
     try {
       const response = await this.client.send(command);
@@ -74,7 +55,7 @@ export class S3Client {
     core.debug(`Heading object from S3 with key ${key}, file ${file}.`);
     const command = new s3.HeadObjectCommand({
       Bucket: this.bucketName,
-      Key: S3Client.joinKey(key, file),
+      Key: Client.joinKey(key, file),
     });
     try {
       await this.client.send(command);
@@ -101,9 +82,9 @@ export class S3Client {
       );
     }
     return (
-      response.Contents?.filter((object) => S3Client.matchFile(object.Key!, file))
+      response.Contents?.filter((object) => Client.matchFile(object.Key!, file))
         .sort((x, y) => (x.LastModified!.getTime() < y.LastModified!.getTime() ? 1 : -1))
-        .map((object) => S3Client.getKey(object.Key!)) ?? []
+        .map((object) => Client.getKey(object.Key!)) ?? []
     );
   }
 
@@ -113,7 +94,7 @@ export class S3Client {
       client: this.client,
       params: {
         Bucket: this.bucketName,
-        Key: S3Client.joinKey(key, file),
+        Key: Client.joinKey(key, file),
         Body: stream,
       },
     });

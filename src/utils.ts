@@ -1,6 +1,7 @@
-import * as crypto from "crypto";
-import * as fs from "fs";
-import * as tmp from "tmp";
+import * as core from "@actions/core";
+import * as s3 from "@aws-sdk/client-s3";
+
+import { Env, Inputs } from "./constants";
 
 export function splitInput(str: string): string[] {
   return str
@@ -9,16 +10,20 @@ export function splitInput(str: string): string[] {
     .filter((s) => s !== "" && !s.startsWith("#"));
 }
 
-export function fileName(path: string[]): string {
-  const hash = crypto.createHash("md5").update(path.join("\n")).digest("hex");
-  return `${hash}.tar.gz`;
+export function newS3Client(): s3.S3Client {
+  const region = getAWSInput("AWSRegion");
+  const accessKeyId = getAWSInput("AWSAccessKeyId");
+  const secretAccessKey = getAWSInput("AWSSecretAccessKey");
+  const sessionToken = getAWSInput("AWSSessionToken");
+  return new s3.S3Client({
+    region,
+    credentials: { accessKeyId, secretAccessKey, sessionToken },
+  });
 }
 
-export function archivePath(): string {
-  const tmpdir = process.env.RUNNER_TEMP || "";
-  return tmp.tmpNameSync({ tmpdir, postfix: ".tar.gz" });
-}
-
-export function fileSize(file: string): number {
-  return fs.statSync(file).size;
+function getAWSInput(key: keyof typeof Inputs & keyof typeof Env): string {
+  const value =
+    core.getState(Env[key]) || core.getInput(Inputs[key]) || process.env[Env[key]] || "";
+  core.saveState(Env[key], value);
+  return value;
 }
