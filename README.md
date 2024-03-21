@@ -49,8 +49,7 @@ Refer to [action.yaml](https://github.com/itchyny/s3-cache-action/blob/main/acti
   The action implements cache versioning based on the `path`, so you don't need to change the `key` when changing the `path`.
 - The action does not separate caches based on the operating system, especially for Windows.
   You can include `${{ runner.os }}` in `key` and `restore-keys`.
-- The action does not provide separate save-only and restore-only actions (yet).
-  The action does not provide `fail-on-cache-miss` and `lookup-only` options (yet).
+- The action does not provide `fail-on-cache-miss` and `lookup-only` options (yet).
   The action always uses `.tar.gz` archive format for implementation simplicity.
 
 ## Bug Tracker

@@ -1,0 +1,31 @@
+name: Save cache files to Amazon S3
+description: GitHub Action to save cache files to Amazon S3
+author: itchyny
+inputs:
+  path:
+    description: A list of file paths or glob patterns to save
+    required: true
+  key:
+    description: A key to use for saving the files
+    required: true
+  bucket-name:
+    description: Bucket name to save cache files
+    required: true
+  aws-region:
+    description: AWS region of the bucket
+    required: false
+  aws-access-key-id:
+    description: AWS access key ID to access the bucket
+    required: false
+  aws-secret-access-key:
+    description: AWS secret access key to access the bucket
+    required: false
+  aws-session-token:
+    description: AWS session token to access the bucket
+    required: false
+runs:
+  using: node20
+  main: ../dist/save/index.js
+branding:
+  icon: archive
+  color: gray-dark

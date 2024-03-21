@@ -1,0 +1,40 @@
+name: Restore cache files from Amazon S3
+description: GitHub Action to restore cache files from Amazon S3
+author: itchyny
+inputs:
+  path:
+    description: A list of file paths or glob patterns to restore
+    required: true
+  key:
+    description: A key to use for restoring the files
+    required: true
+  restore-keys:
+    description: An ordered list of keys to use for restoring the files
+    required: false
+  bucket-name:
+    description: Bucket name to restore cache files
+    required: true
+  aws-region:
+    description: AWS region of the bucket
+    required: false
+  aws-access-key-id:
+    description: AWS access key ID to access the bucket
+    required: false
+  aws-secret-access-key:
+    description: AWS secret access key to access the bucket
+    required: false
+  aws-session-token:
+    description: AWS session token to access the bucket
+    required: false
+outputs:
+  cache-hit:
+    description:
+      A string "true" or "false" indicating whether the cache hit with the key.
+      If the cache is restored with one of the restore-keys, the value is "false".
+      If the cacne is not restored, the value is "".
+runs:
+  using: node20
+  main: ../dist/restore/index.js
+branding:
+  icon: archive
+  color: gray-dark
