@@ -31,7 +31,7 @@ outputs:
     description:
       A string "true" or "false" indicating whether the cache hit with the key.
       If the cache is restored with one of the restore-keys, the value is "false".
-      If the cacne is not restored, the value is "".
+      If the cache is not restored, the value is "".
 runs:
   using: node20
   main: dist/restore/index.js
