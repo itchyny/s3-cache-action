@@ -1,3 +1,7 @@
 # Changelog
+## [v1.0.1](https://github.com/itchyny/s3-cache-action/compare/v1.0.0..v1.0.1) (2024-04-01)
++ update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.529.1 to 3.540.0
++ update `tar` from 6.2.0 to 6.2.1
+
 ## [v1.0.0](https://github.com/itchyny/s3-cache-action/compare/80e5042..v1.0.0) (2024-03-22)
 * initial implementation of `s3-cache-action` and the npm package
