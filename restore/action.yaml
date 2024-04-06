@@ -11,6 +11,12 @@ inputs:
   restore-keys:
     description: An ordered list of keys to use for restoring the files
     required: false
+  lookup-only:
+    description: A boolean value indicating whether to lookup without downloading the cache
+    required: false
+  fail-on-cache-miss:
+    description: A boolean value indicating whether to fail if the cache is not found
+    required: false
   bucket-name:
     description: Bucket name to restore cache files
     required: true

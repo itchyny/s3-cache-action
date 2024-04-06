@@ -2,6 +2,8 @@ export enum Inputs {
   Path = "path",
   Key = "key",
   RestoreKeys = "restore-keys",
+  LookupOnly = "lookup-only",
+  FailOnCacheMiss = "fail-on-cache-miss",
   BucketName = "bucket-name",
   AWSRegion = "aws-region",
   AWSAccessKeyId = "aws-access-key-id",

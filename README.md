@@ -5,7 +5,7 @@ This action works similarly to [actions/cache](https://github.com/actions/cache)
 ## Usage
 The action can be used in the same way as `actions/cache`, but requires input parameters for S3 bucket name and AWS credentials.
 Firstly, learn the basic usage of `actions/cache` in [GitHub Docs: Using the cache action](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#using-the-cache-action).
-The input parameters `path`, `key`, `restore-keys`, and the output parameter `cache-hit` are compatible with `actions/cache`.
+The input parameters `path`, `key`, `restore-keys`, `lookup-only`, `fail-on-cache-miss`, and the output parameter `cache-hit` are compatible with `actions/cache`.
 For examples of caching configurations in each language, see [actions/cache: Implementation Examples](https://github.com/actions/cache#implementation-examples).
 
 ```yaml
@@ -49,7 +49,6 @@ Refer to [action.yaml](https://github.com/itchyny/s3-cache-action/blob/main/acti
   The action implements cache versioning based on the `path`, so you don't need to change the `key` when changing the `path`.
 - The action does not separate caches based on the operating system, especially for Windows.
   You can include `${{ runner.os }}` in `key` and `restore-keys`.
-- The action does not provide `fail-on-cache-miss` and `lookup-only` options (yet).
   The action always uses `.tar.gz` archive format for implementation simplicity.
 
 ## npm package
@@ -63,40 +62,36 @@ npm install @itchyny/s3-cache-action
 import * as s3 from '@aws-sdk/client-s3';
 import * as cache from '@itchyny/s3-cache-action';
 
+const bucketName: string = 'bucket-name';
+const s3Client: s3.S3Client = new s3.S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    sessionToken: process.env.AWS_SESSION_TOKEN!,
+  },
+});
+
 async function main() {
   const saved = await cache.saveCache(
-    ['*.txt'],
-    'test-key',
-    'bucket-name',
-    new s3.S3Client({
-      region: process.env.AWS_REGION!,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-        sessionToken: process.env.AWS_SESSION_TOKEN!,
-      },
-    }),
+    ['*.txt'], 'test-key', bucketName, s3Client,
   );
   if (!saved) {
-    console.log('Cache already exists, skip saving.');
+    console.log('Cache already exists, skipped saving.');
   }
 
-  const matchedKey = await cache.restoreCache(
-    ['*.txt'],
-    'test-key',
-    ['test-'],
-    'bucket-name',
-    new s3.S3Client({
-      region: process.env.AWS_REGION!,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-        sessionToken: process.env.AWS_SESSION_TOKEN!,
-      },
-    }),
+  const restoredKey = await cache.restoreCache(
+    ['*.txt'], 'test-key', ['test-'], bucketName, s3Client,
   );
-  if (matchedKey) {
-    console.log(`Cache restored with key ${matchedKey}.`);
+  if (restoredKey) {
+    console.log(`Cache restored with key ${restoredKey}.`);
+  }
+
+  const foundKey = await cache.lookupCache(
+    ['*.txt'], 'test-key', ['test-'], bucketName, s3Client,
+  );
+  if (foundKey) {
+    console.log(`Cache found with key ${foundKey}.`);
   }
 }
 ```

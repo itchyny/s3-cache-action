@@ -173,8 +173,8 @@ jobs:
           diff -r original restored
           grep -q -x "${{ github.run_id }}" ~/test-file
 
-  different-path:
-    name: Different path
+  lookup-only:
+    name: Lookup only
     needs: save-files
     runs-on: ubuntu-latest
     steps:
@@ -189,20 +189,20 @@ jobs:
         id: cache
         uses: ./
         with:
-          path: ~/test-file-${{ github.run_attempt }}
+          path: |
+            test-file-*
+            test-dir
+            ~/test-file
           key: ${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: |
-            ${{ runner.os }}-${{ github.run_id }}-
+          lookup-only: true
           bucket-name: ${{ vars.BUCKET_NAME }}
       - name: Check outputs
-        run: test -z "${{ steps.cache.outputs.cache-hit }}"
+        run: test "${{ steps.cache.outputs.cache-hit }}" == "true"
       - name: Check file does not exist
         run: |
-          if [[ -f ~/test-file-${{ github.run_attempt }} ]]; then
+          if [[ -f ~/test-file ]]; then
             exit 1
           fi
-      - name: Create test file
-        run: echo "${{ github.run_id }}" > ~/test-file-${{ github.run_attempt }}
 
   save-only:
     name: Save only
@@ -262,9 +262,36 @@ jobs:
           cp -r test-* restored
           diff -r original restored
 
+  lookup-no-hit:
+    name: Lookup no hit
+    needs: save-only
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Test action
+        id: cache
+        uses: ./restore
+        with:
+          path: test-*
+          key: ${{ runner.os }}-${{ github.run_id }}-0${{ github.run_attempt }}
+          lookup-only: true
+          bucket-name: ${{ vars.BUCKET_NAME }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Check outputs
+        run: test -z "${{ steps.cache.outputs.cache-hit }}"
+
   release:
     name: Release
-    needs: [test, restore-files, restore-keys, different-path, restore-only]
+    needs:
+      - test
+      - restore-files
+      - restore-keys
+      - lookup-only
+      - restore-only
+      - lookup-no-hit
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write

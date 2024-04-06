@@ -44,6 +44,8 @@ function clearInputs(): void {
   delete process.env["INPUT_PATH"];
   delete process.env["INPUT_KEY"];
   delete process.env["INPUT_RESTORE-KEYS"];
+  delete process.env["INPUT_LOOKUP-ONLY"];
+  delete process.env["INPUT_FAIL-ON-CACHE-MISS"];
   delete process.env["INPUT_BUCKET-NAME"];
 }
 
@@ -51,6 +53,8 @@ export function setupInputs({
   path = "",
   key = "",
   restoreKeys = [],
+  lookupOnly = false,
+  failOnCacheMiss = false,
   bucketName = "test-bucket-name",
   awsRegion = "ap-northeast-1",
   awsAccessKeyId = "",
@@ -60,6 +64,8 @@ export function setupInputs({
   path?: string;
   key?: string;
   restoreKeys?: string[];
+  lookupOnly?: boolean;
+  failOnCacheMiss?: boolean;
   bucketName?: string;
   awsRegion?: string;
   awsAccessKeyId?: string;
@@ -69,6 +75,8 @@ export function setupInputs({
   process.env["INPUT_PATH"] = path;
   process.env["INPUT_KEY"] = key;
   process.env["INPUT_RESTORE-KEYS"] = restoreKeys.join("\n");
+  process.env["INPUT_LOOKUP-ONLY"] = lookupOnly.toString();
+  process.env["INPUT_FAIL-ON-CACHE-MISS"] = failOnCacheMiss.toString();
   process.env["INPUT_BUCKET-NAME"] = bucketName;
   process.env["INPUT_AWS-REGION"] = awsRegion;
   process.env["INPUT_AWS-ACCESS-KEY-ID"] = awsAccessKeyId;

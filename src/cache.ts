@@ -80,17 +80,17 @@ export async function restoreCache(
   const archive = archivePath();
 
   try {
-    let matchedKey: string | undefined;
+    let restoredKey: string | undefined;
     // Restore the cache from S3 with the cache key.
     if (await client.getObject(key, file, fs.createWriteStream(archive))) {
-      matchedKey = key;
+      restoredKey = key;
     } else {
       core.info(`Cache not found in S3 with key ${key}.`);
       // Restore the cache from S3 with the restore keys.
       L: for (const restoreKey of restoreKeys) {
         for (const key of await client.listObjects(restoreKey, file)) {
           if (await client.getObject(key, file, fs.createWriteStream(archive))) {
-            matchedKey = key;
+            restoredKey = key;
             break L;
           }
         }
@@ -98,15 +98,15 @@ export async function restoreCache(
       }
     }
 
-    if (matchedKey) {
+    if (restoredKey) {
       // Extract the tarball archive.
       core.debug(`Extracting archive ${archive}.`);
       // @ts-expect-error: `preservePaths` is missing
       await tar.extract({ file: archive, preservePaths: true });
-      core.info(`Cache restored from S3 with key ${matchedKey}, ${fileSize(archive)} bytes.`);
+      core.info(`Cache restored from S3 with key ${restoredKey}, ${fileSize(archive)} bytes.`);
     }
 
-    return matchedKey;
+    return restoredKey;
   } finally {
     try {
       core.debug(`Deleting archive ${archive}.`);
@@ -117,6 +117,48 @@ export async function restoreCache(
       }
     }
   }
+}
+
+/**
+ * Lookup cache from Amazon S3.
+ * @param paths The paths to cache.
+ * @param key The cache key.
+ * @param restoreKeys The restore keys.
+ * @param bucketName The S3 bucket name.
+ * @param s3Client The S3 client.
+ * @returns The matched key of the cache.
+ */
+export async function lookupCache(
+  paths: string[],
+  key: string,
+  restoreKeys: string[],
+  bucketName: string,
+  s3Client: s3.S3Client,
+): Promise<string | undefined> {
+  const client = new Client(bucketName, s3Client);
+  const file = fileName(paths);
+
+  let foundKey: string | undefined;
+  // Lookup the cache from S3 with the cache key.
+  if (await client.headObject(key, file)) {
+    core.info(`Cache found in S3 with key ${key}.`);
+    foundKey = key;
+  } else {
+    core.info(`Cache not found in S3 with key ${key}.`);
+    // Lookup the cache from S3 with the restore keys.
+    L: for (const restoreKey of restoreKeys) {
+      for (const key of await client.listObjects(restoreKey, file)) {
+        if (await client.headObject(key, file)) {
+          core.info(`Cache found in S3 with key ${key}, restore key ${restoreKey}.`);
+          foundKey = key;
+          break L;
+        }
+      }
+      core.info(`Cache not found in S3 with restore key ${restoreKey}.`);
+    }
+  }
+
+  return foundKey;
 }
 
 function fileName(paths: string[]): string {
