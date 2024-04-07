@@ -101,7 +101,6 @@ export async function restoreCache(
     if (restoredKey) {
       // Extract the tarball archive.
       core.debug(`Extracting archive ${archive}.`);
-      // @ts-expect-error: `preservePaths` is missing
       await tar.extract({ file: archive, preservePaths: true });
       core.info(`Cache restored from S3 with key ${restoredKey}, ${fileSize(archive)} bytes.`);
     }
