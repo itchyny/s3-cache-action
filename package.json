@@ -30,7 +30,7 @@
     "test": "jest --runInBand",
     "lint": "eslint *.ts src/*.ts tests/*.ts",
     "lint:fix": "eslint --fix *.ts src/*.ts tests/*.ts",
-    "prepublishOnly": "tsc --declaration --sourceMap"
+    "prepublishOnly": "tsc --declaration"
   },
   "dependencies": {
     "@actions/core": "^1.10.1",
