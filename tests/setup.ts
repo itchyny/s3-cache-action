@@ -13,7 +13,7 @@ beforeEach(() => {
   clearInputs();
   delete process.env.STATE_CACHE_PATH;
   delete process.env.STATE_CACHE_KEY;
-  delete process.env.STATE_CACHE_MATCHED_KEY;
+  delete process.env.STATE_CACHE_HIT;
   process.env.GITHUB_STATE = createEmptyFile();
   process.env.GITHUB_OUTPUT = createEmptyFile();
   s3Mock.callsFake((input) => {

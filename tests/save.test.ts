@@ -64,7 +64,7 @@ describe("save", () => {
 
   it("should not save the cache if the cache has been restored", async () => {
     setupInputs({ path: "tests", key: "test-key" });
-    setState("CACHE_MATCHED_KEY", "test-key");
+    setState("CACHE_HIT", "true");
 
     await save();
     expect(s3Mock).not.toHaveReceivedAnyCommand();
@@ -72,7 +72,7 @@ describe("save", () => {
 
   it("should save the cache if the cache has been restored with a different key", async () => {
     setupInputs({ path: "tests", key: "test-key" });
-    setState("CACHE_MATCHED_KEY", "test-another-key");
+    setState("CACHE_HIT", "false");
 
     s3Mock
       .on(s3.HeadObjectCommand, {

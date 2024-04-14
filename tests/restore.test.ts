@@ -31,7 +31,7 @@ describe("restore", () => {
     expect(fs.readFileSync("tests/test.txt", "utf-8")).toBe("Hello, world!\n");
     expect(getState("CACHE_PATH")).toBe("tests/test.txt");
     expect(getState("CACHE_KEY")).toBe("test-key");
-    expect(getState("CACHE_MATCHED_KEY")).toBe("test-key");
+    expect(getState("CACHE_HIT")).toBe("true");
     expect(getOutput("cache-hit")).toBe("true");
     expect(s3Mock).toHaveReceivedCommandTimes(s3.GetObjectCommand, 1);
   });
@@ -76,7 +76,7 @@ describe("restore", () => {
     expect(fs.readFileSync("tests/test.txt", "utf-8")).toBe("Hello, world!\n");
     expect(getState("CACHE_PATH")).toBe("tests/test.txt");
     expect(getState("CACHE_KEY")).toBe("test-key");
-    expect(getState("CACHE_MATCHED_KEY")).toBe("test-key1");
+    expect(getState("CACHE_HIT")).toBe("false");
     expect(getOutput("cache-hit")).toBe("false");
     expect(s3Mock).toHaveReceivedCommandTimes(s3.GetObjectCommand, 2);
     expect(s3Mock).toHaveReceivedCommandTimes(s3.ListObjectsV2Command, 1);
@@ -97,7 +97,7 @@ describe("restore", () => {
 
     await restore();
     expect(fs.existsSync("tests/test.txt")).toBeFalsy();
-    expect(() => getState("CACHE_MATCHED_KEY")).toThrow("State key not found: CACHE_MATCHED_KEY");
+    expect(() => getState("CACHE_HIT")).toThrow("State key not found: CACHE_HIT");
     expect(() => getOutput("cache-hit")).toThrow("Output key not found: cache-hit");
     expect(s3Mock).toHaveReceivedCommandTimes(s3.GetObjectCommand, 1);
     expect(s3Mock).toHaveReceivedCommandTimes(s3.ListObjectsV2Command, 1);
@@ -125,7 +125,7 @@ describe("restore", () => {
       "Cache not found in S3 with key: test-key, restore keys: [test-]",
     );
     expect(fs.existsSync("tests/test.txt")).toBeFalsy();
-    expect(() => getState("CACHE_MATCHED_KEY")).toThrow("State key not found: CACHE_MATCHED_KEY");
+    expect(() => getState("CACHE_HIT")).toThrow("State key not found: CACHE_HIT");
     expect(() => getOutput("cache-hit")).toThrow("Output key not found: cache-hit");
     expect(s3Mock).toHaveReceivedCommandTimes(s3.GetObjectCommand, 1);
     expect(s3Mock).toHaveReceivedCommandTimes(s3.ListObjectsV2Command, 1);
@@ -144,7 +144,7 @@ describe("restore", () => {
     expect(fs.existsSync("tests/test.txt")).toBeFalsy();
     expect(getState("CACHE_PATH")).toBe("tests/test.txt");
     expect(getState("CACHE_KEY")).toBe("test-key");
-    expect(getState("CACHE_MATCHED_KEY")).toBe("test-key");
+    expect(getState("CACHE_HIT")).toBe("true");
     expect(getOutput("cache-hit")).toBe("true");
     expect(s3Mock).toHaveReceivedCommandTimes(s3.HeadObjectCommand, 1);
   });
@@ -190,7 +190,7 @@ describe("restore", () => {
     expect(fs.existsSync("tests/test.txt")).toBeFalsy();
     expect(getState("CACHE_PATH")).toBe("tests/test.txt");
     expect(getState("CACHE_KEY")).toBe("test-key");
-    expect(getState("CACHE_MATCHED_KEY")).toBe("test-key1");
+    expect(getState("CACHE_HIT")).toBe("false");
     expect(getOutput("cache-hit")).toBe("false");
     expect(s3Mock).toHaveReceivedCommandTimes(s3.HeadObjectCommand, 2);
     expect(s3Mock).toHaveReceivedCommandTimes(s3.ListObjectsV2Command, 1);
@@ -216,7 +216,7 @@ describe("restore", () => {
 
     await restore();
     expect(fs.existsSync("tests/test.txt")).toBeFalsy();
-    expect(() => getState("CACHE_MATCHED_KEY")).toThrow("State key not found: CACHE_MATCHED_KEY");
+    expect(() => getState("CACHE_HIT")).toThrow("State key not found: CACHE_HIT");
     expect(() => getOutput("cache-hit")).toThrow("Output key not found: cache-hit");
     expect(s3Mock).toHaveReceivedCommandTimes(s3.HeadObjectCommand, 1);
     expect(s3Mock).toHaveReceivedCommandTimes(s3.ListObjectsV2Command, 1);
@@ -226,7 +226,7 @@ describe("restore", () => {
     setupInputs({ path: "", key: "test-key" });
 
     await expect(restore()).rejects.toThrow("Input required and not supplied: path");
-    expect(() => getState("CACHE_MATCHED_KEY")).toThrow("State key not found: CACHE_MATCHED_KEY");
+    expect(() => getState("CACHE_HIT")).toThrow("State key not found: CACHE_HIT");
     expect(() => getOutput("cache-hit")).toThrow("Output key not found: cache-hit");
     expect(s3Mock).not.toHaveReceivedAnyCommand();
   });
@@ -235,7 +235,7 @@ describe("restore", () => {
     setupInputs({ path: "tests/test.txt", key: "" });
 
     await expect(restore()).rejects.toThrow("Input required and not supplied: key");
-    expect(() => getState("CACHE_MATCHED_KEY")).toThrow("State key not found: CACHE_MATCHED_KEY");
+    expect(() => getState("CACHE_HIT")).toThrow("State key not found: CACHE_HIT");
     expect(() => getOutput("cache-hit")).toThrow("Output key not found: cache-hit");
     expect(s3Mock).not.toHaveReceivedAnyCommand();
   });

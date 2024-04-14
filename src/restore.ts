@@ -28,7 +28,7 @@ export async function restore() {
     ? await lookupCache(path, key, restoreKeys, bucketName, newS3Client())
     : await restoreCache(path, key, restoreKeys, bucketName, newS3Client());
   if (matchedKey) {
-    core.saveState(State.CacheMatchedKey, matchedKey);
+    core.saveState(State.CacheHit, matchedKey === key);
     core.setOutput(Outputs.CacheHit, matchedKey === key);
   } else if (failOnCacheMiss) {
     throw new Error(

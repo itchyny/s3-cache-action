@@ -16,8 +16,7 @@ export async function save() {
   core.debug(`${Inputs.BucketName}: ${bucketName}`);
 
   // If the cache has already been restored, don't save it again.
-  const restoredKey = core.getState(State.CacheMatchedKey);
-  if (restoredKey === key) {
+  if (core.getState(State.CacheHit) === "true") {
     core.info(`Cache restored from S3 with key ${key}, not saving cache.`);
     return;
   }
