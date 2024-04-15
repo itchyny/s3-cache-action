@@ -46,10 +46,12 @@ Refer to [action.yaml](https://github.com/itchyny/s3-cache-action/blob/main/acti
 
 - The action does not have cache scope based on branches, so it may restore caches from a sibling branch.
   You can include `${{ github.ref_name }}` in `key` and default branch name in `restore-keys` to emulate the behavior.
-  The action implements cache versioning based on the `path`, so you don't need to change the `key` when changing the `path`.
+- The action restores caches using `key` by exact matching, while `actions/cache` restores by prefix matching.
+  You can include the same `key` in `restore-keys` for prefix matching.
 - The action does not separate caches based on the operating system, especially for Windows.
   You can include `${{ runner.os }}` in `key` and `restore-keys`.
-  The action always uses `.tar.gz` archive format for implementation simplicity.
+- The action uses only gzip compression to simplify implementation, while `actions/cache` uses Zstandard if possible.
+  The action does not use any external commands, while `actions/cache` relies on `tar`, `gzip`, and `zstd` commands.
 
 ## npm package
 The core implementation of this action is available as an npm package:
