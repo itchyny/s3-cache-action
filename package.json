@@ -37,13 +37,12 @@
     "@actions/glob": "^0.4.0",
     "@aws-sdk/client-s3": "^3.540.0",
     "@aws-sdk/lib-storage": "^3.540.0",
-    "tar": "^6.2.1",
+    "tar": "^7.0.1",
     "tmp": "^0.2.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.2",
-    "@types/tar": "^6.1.12",
     "@types/tmp": "^0.2.6",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
