@@ -13,5 +13,7 @@ updates:
     schedule:
       interval: monthly
     groups:
-      npm-packages:
-        patterns: ["*"]
+      npm-dependencies:
+        dependency-type: production
+      npm-dev-dependencies:
+        dependency-type: development
