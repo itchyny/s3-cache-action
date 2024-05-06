@@ -28,8 +28,8 @@
   "scripts": {
     "build": "ncc build -m -o dist/restore src/restore.ts && ncc build -m -o dist/save src/save.ts",
     "test": "jest --runInBand",
-    "lint": "eslint *.ts src/*.ts tests/*.ts",
-    "lint:fix": "eslint --fix *.ts src/*.ts tests/*.ts",
+    "lint": "eslint *.ts *.mjs src/*.ts tests/*.ts",
+    "lint:fix": "eslint --fix *.ts *.mjs src/*.ts tests/*.ts",
     "prepublishOnly": "tsc --declaration"
   },
   "dependencies": {
@@ -44,8 +44,6 @@
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.2",
     "@types/tmp": "^0.2.6",
-    "@typescript-eslint/eslint-plugin": "^7.4.0",
-    "@typescript-eslint/parser": "^7.4.0",
     "@vercel/ncc": "^0.38.1",
     "aws-sdk-client-mock": "^4.0.0",
     "aws-sdk-client-mock-jest": "^4.0.0",
@@ -58,6 +56,7 @@
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "typescript-eslint": "^7.4.0"
   }
 }
