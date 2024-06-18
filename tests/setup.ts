@@ -92,7 +92,7 @@ export function addCleanupFiles(...files: string[]): void {
   cleanupFiles.push(...files);
 }
 
-export function createReadStream(file: string): SdkStream<Readable> {
+export function createReadStream(file: string): SdkStream<Readable | ReadableStream | Blob> {
   return sdkStreamMixin(fs.createReadStream(file));
 }
 
