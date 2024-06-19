@@ -1,6 +1,6 @@
 {
   "name": "@itchyny/s3-cache-action",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Cache files to Amazon S3",
   "author": "itchyny <itchyny@cybozu.co.jp>",
   "license": "MIT",

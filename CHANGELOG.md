@@ -1,4 +1,8 @@
 # Changelog
+## [v1.1.1](https://github.com/itchyny/s3-cache-action/compare/v1.1.0..v1.1.1) (2024-06-19)
+* improve logic for checking cache hit state to skip saving cache
+* update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.540.0 to 3.600.0
+
 ## [v1.1.0](https://github.com/itchyny/s3-cache-action/compare/v1.0.1..v1.1.0) (2024-04-08)
 * implement `lookup-only` option to lookup the cache without downloading it
 * implement `fail-on-cache-miss` option to fail the action if the cache is not found
