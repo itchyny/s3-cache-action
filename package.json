@@ -37,12 +37,13 @@
     "@actions/glob": "^0.4.0",
     "@aws-sdk/client-s3": "^3.600.0",
     "@aws-sdk/lib-storage": "^3.600.0",
-    "tar": "^7.2.0",
+    "tar": "^6.2.1",
     "tmp": "^0.2.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.2",
+    "@types/tar": "^6.1.12",
     "@types/tmp": "^0.2.6",
     "@vercel/ncc": "^0.38.1",
     "aws-sdk-client-mock": "^4.0.1",
