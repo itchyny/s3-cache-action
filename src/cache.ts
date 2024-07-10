@@ -42,14 +42,20 @@ export async function saveCache(
   const archive = archivePath();
   try {
     core.debug(`Creating archive ${archive}.`);
-    // await tar.create({ file: archive, gzip: true, preservePaths: true }, expandedPaths);
-    await tar.create({ preservePaths: true }, expandedPaths)
-                .pipe(lzma.createCompressor())
-                .pipe(fs.createWriteStream(archive));
+
+    const compressStream = lzma.createCompressor();
+    const writeStream = fs.createWriteStream(archive);
+
+    tar.create({ preservePaths: true }, expandedPaths)
+      .pipe(compressStream)
+      .pipe(writeStream)
 
     // Save the cache to S3.
-    await client.putObject(key, file, fs.createReadStream(archive));
-    core.info(`Cache saved to S3 with key ${key}, ${fileSize(archive)} bytes.`);
+    writeStream.on("finish", () => {
+      client.putObject(key, file, fs.createReadStream(archive));
+      core.info(`Cache saved to S3 with key ${key}, ${fileSize(archive)} bytes.`);
+    });
+
     return true;
   } finally {
     try {
@@ -83,21 +89,17 @@ export async function restoreCache(
   const file = fileName(paths);
   const archive = archivePath();
 
-  const decompressor = lzma.createDecompressor();
-  const decompressedWriter = decompressor.pipe(fs.createWriteStream(archive));
-  //const decompressedUntar = decompressor.pipe(tar.extract({ preservePaths: true }));
-
   try {
     let restoredKey: string | undefined;
     // Restore the cache from S3 with the cache key.
-    if (await client.getObject(key, file, decompressedWriter)) {
+    if (await client.getObject(key, file, fs.createWriteStream(archive))) {
       restoredKey = key;
     } else {
       core.info(`Cache not found in S3 with key ${key}.`);
       // Restore the cache from S3 with the restore keys.
       L: for (const restoreKey of restoreKeys) {
         for (const key of await client.listObjects(restoreKey, file)) {
-          if (await client.getObject(key, file, decompressedWriter)) {
+          if (await client.getObject(key, file, fs.createWriteStream(archive))) {
             restoredKey = key;
             break L;
           }
@@ -109,8 +111,18 @@ export async function restoreCache(
     if (restoredKey) {
       // Extract the tarball archive.
       core.debug(`Extracting archive ${archive}.`);
-      await tar.extract({ file: archive, preservePaths: true });
-      core.info(`Cache restored from S3 with key ${restoredKey}, ${fileSize(archive)} bytes.`);
+
+      const readStream = fs.createReadStream(archive);
+      const decompressStream = lzma.createDecompressor();
+      const extractStream = tar.extract({ preservePaths: true });
+
+      readStream
+        .pipe(decompressStream)
+        .pipe(extractStream);
+
+      extractStream.on("finish", () => {
+        core.info(`Cache restored from S3 with key ${restoredKey}, ${fileSize(archive)} bytes.`);
+      });
     }
 
     return restoredKey;
