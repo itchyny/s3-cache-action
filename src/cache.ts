@@ -5,6 +5,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as tar from "tar";
 import * as tmp from "tmp";
+import * as lzma from "lzma-native";
 
 import { Client } from "./client";
 
@@ -41,7 +42,10 @@ export async function saveCache(
   const archive = archivePath();
   try {
     core.debug(`Creating archive ${archive}.`);
-    await tar.create({ file: archive, gzip: true, preservePaths: true }, expandedPaths);
+    // await tar.create({ file: archive, gzip: true, preservePaths: true }, expandedPaths);
+    await tar.create({ preservePaths: true }, expandedPaths)
+                .pipe(lzma.createCompressor())
+                .pipe(fs.createWriteStream(archive));
 
     // Save the cache to S3.
     await client.putObject(key, file, fs.createReadStream(archive));
@@ -79,17 +83,21 @@ export async function restoreCache(
   const file = fileName(paths);
   const archive = archivePath();
 
+  const decompressor = lzma.createDecompressor();
+  const decompressedWriter = decompressor.pipe(fs.createWriteStream(archive));
+  //const decompressedUntar = decompressor.pipe(tar.extract({ preservePaths: true }));
+
   try {
     let restoredKey: string | undefined;
     // Restore the cache from S3 with the cache key.
-    if (await client.getObject(key, file, fs.createWriteStream(archive))) {
+    if (await client.getObject(key, file, decompressedWriter)) {
       restoredKey = key;
     } else {
       core.info(`Cache not found in S3 with key ${key}.`);
       // Restore the cache from S3 with the restore keys.
       L: for (const restoreKey of restoreKeys) {
         for (const key of await client.listObjects(restoreKey, file)) {
-          if (await client.getObject(key, file, fs.createWriteStream(archive))) {
+          if (await client.getObject(key, file, decompressedWriter)) {
             restoredKey = key;
             break L;
           }
@@ -162,12 +170,12 @@ export async function lookupCache(
 
 function fileName(paths: string[]): string {
   const hash = crypto.createHash("md5").update(paths.join("\n")).digest("hex");
-  return `${hash}.tar.gz`;
+  return `${hash}.tar.xz`;
 }
 
 function archivePath(): string {
   const tmpdir = process.env.RUNNER_TEMP || "";
-  return tmp.tmpNameSync({ tmpdir, postfix: ".tar.gz" });
+  return tmp.tmpNameSync({ tmpdir, postfix: ".tar.xz" });
 }
 
 function fileSize(file: string): number {
