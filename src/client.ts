@@ -28,6 +28,21 @@ export class Client {
     return objectKey.substring(0, index);
   }
 
+  async getObjectStream(key: string, file: string): Promise<Readable> {
+    core.debug(`Streaming object from S3 with key ${key}, file ${file}.`);
+    const command = new s3.GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: Client.joinKey(key, file),
+    });
+
+    const response = await this.client.send(command);
+    if (!response.Body || !(response.Body instanceof Readable)) {
+      throw new Error(`Failed to get S3 object stream with key ${key}, file ${file}`);
+    }
+
+    return response.Body;
+  }
+
   async getObject(key: string, file: string, stream: fs.WriteStream): Promise<boolean> {
     core.debug(`Getting object from S3 with key ${key}, file ${file}.`);
     const command = new s3.GetObjectCommand({
@@ -102,5 +117,21 @@ export class Client {
       core.debug(`Uploaded ${loaded} of ${total} bytes.`);
     });
     await upload.done();
+  }
+
+  putObjectStream(key: string, file: string, stream: Readable): Upload {
+    core.debug(`Putting object to S3 with key ${key}, file ${file}.`);
+    const upload = new Upload({
+      client: this.client,
+      params: {
+        Bucket: this.bucketName,
+        Key: Client.joinKey(key, file),
+        Body: stream,
+      },
+    });
+    upload.on("httpUploadProgress", ({ loaded, total }) => {
+      core.debug(`Uploaded ${loaded} of ${total} bytes.`);
+    });
+    return upload;
   }
 }
