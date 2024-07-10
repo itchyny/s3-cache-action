@@ -130,7 +130,11 @@ export class Client {
       },
     });
     upload.on("httpUploadProgress", ({ loaded, total }) => {
-      core.debug(`Uploaded ${loaded} of ${total} bytes.`);
+      if (loaded == total) {
+        core.info(`Finished uploading ${total} bytes to S3 at key ${key}, file ${file}`);
+      } else {
+        core.debug(`Uploaded ${loaded} of ${total} bytes.`);
+      }
     });
     return upload;
   }

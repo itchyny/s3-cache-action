@@ -2,9 +2,7 @@ import * as core from "@actions/core";
 import * as glob from "@actions/glob";
 import * as s3 from "@aws-sdk/client-s3";
 import * as crypto from "crypto";
-import * as fs from "fs";
 import * as tar from "tar";
-import * as tmp from "tmp";
 import * as lzma from "lzma-native";
 import { pipeline } from "stream/promises";
 
@@ -40,34 +38,21 @@ export async function saveCache(
     .then((globber) => globber.glob());
   core.debug(`expanded paths: [${expandedPaths.join(", ")}]`);
 
-  // Create a tarball archive.
-  const archive = archivePath();
-  try {
-    core.debug(`Creating archive ${archive}.`);
-    
-    const compressStream = lzma.createCompressor();
-    const tarStream = tar.create({ preservePaths: true }, expandedPaths);
-    const uploadStream = new PassThrough();
+  core.debug(`Creating, compressing, and uploading cache...`);
+  
+  const compressStream = lzma.createCompressor();
+  const tarStream = tar.create({ preservePaths: true }, expandedPaths);
+  const trackedUploadStream = new BandwidthTrackedStream();
 
-    const upload = client.putObjectStream(key, file, uploadStream);
+  const upload = client.putObjectStream(key, file, trackedUploadStream);
 
-    const pipelinePromise = pipeline(tarStream, compressStream, uploadStream);
-    const uploadPromise = upload.done();
+  const pipelinePromise = pipeline(tarStream, compressStream, trackedUploadStream);
+  const uploadPromise = upload.done();
 
-    await Promise.all([pipelinePromise, uploadPromise]);
-    core.info(`Cache saved to S3 with key ${key}, ${fileSize(archive)} bytes.`);
+  await Promise.all([pipelinePromise, uploadPromise]);
+  core.info(`Cache saved to S3 with key ${key}, ${trackedUploadStream.getTotalBytes()} bytes.`);
 
-    return true;
-  } finally {
-    try {
-      core.debug(`Deleting archive ${archive}.`);
-      fs.unlinkSync(archive);
-    } catch (error: unknown) {
-      if (error instanceof Error && !("code" in error && error.code === "ENOENT")) {
-        core.debug(`Failed to delete archive: ${error}`);
-      }
-    }
-  }
+  return true;
 }
 
 /**
@@ -88,51 +73,38 @@ export async function restoreCache(
 ): Promise<string | undefined> {
   const client = new Client(bucketName, s3Client);
   const file = fileName(paths);
-  const archive = archivePath();
 
-  try {
-    let restoredKey: string | undefined;
-    // Restore the cache from S3 with the cache key.
-    if (await client.headObject(key, file)) {
-      restoredKey = key;
-    } else {
-      core.info(`Cache not found in S3 with key ${key}.`);
-      // Restore the cache from S3 with the restore keys.
-      L: for (const restoreKey of restoreKeys) {
-        for (const key of await client.listObjects(restoreKey, file)) {
-          if (await client.headObject(key, file)) {
-            restoredKey = key;
-            break L;
-          }
+  let restoredKey: string | undefined;
+  // Restore the cache from S3 with the cache key.
+  if (await client.headObject(key, file)) {
+    restoredKey = key;
+  } else {
+    core.info(`Cache not found in S3 with key ${key}.`);
+    // Restore the cache from S3 with the restore keys.
+    L: for (const restoreKey of restoreKeys) {
+      for (const key of await client.listObjects(restoreKey, file)) {
+        if (await client.headObject(key, file)) {
+          restoredKey = key;
+          break L;
         }
-        core.info(`Cache not found in S3 with restore key ${restoreKey}.`);
       }
-    }
-
-    if (restoredKey) {
-      const objectStream = await client.getObjectStream(key, file);
-      const decompressStream = lzma.createDecompressor();
-      const extractStream = tar.extract({ preservePaths: true });
-
-      // Extract the tarball archive.
-      core.debug(`Streaming and extracting archive ${archive}.`);
-
-      await pipeline(objectStream, decompressStream, extractStream);
-
-      core.info(`Cache restored from S3 with key ${restoredKey}, ${fileSize(archive)} bytes.`);
-    }
-
-    return restoredKey;
-  } finally {
-    try {
-      core.debug(`Deleting archive ${archive}.`);
-      fs.unlinkSync(archive);
-    } catch (error: unknown) {
-      if (error instanceof Error && !("code" in error && error.code === "ENOENT")) {
-        core.debug(`Failed to delete archive: ${error}`);
-      }
+      core.info(`Cache not found in S3 with restore key ${restoreKey}.`);
     }
   }
+
+  if (restoredKey) {
+    core.debug(`Receiving, decompressing, and extracting cache...`);
+    const objectStream = await client.getObjectStream(key, file);
+    const trackedStream = new BandwidthTrackedStream();
+    const decompressStream = lzma.createDecompressor();
+    const extractStream = tar.extract({ preservePaths: true });
+
+    await pipeline(objectStream, trackedStream, decompressStream, extractStream);
+
+    core.info(`Cache restored from S3 with key ${restoredKey}, ${trackedStream.getTotalBytes()} bytes.`);
+  }
+
+  return restoredKey;
 }
 
 /**
@@ -182,11 +154,15 @@ function fileName(paths: string[]): string {
   return `${hash}.tar.xz`;
 }
 
-function archivePath(): string {
-  const tmpdir = process.env.RUNNER_TEMP || "";
-  return tmp.tmpNameSync({ tmpdir, postfix: ".tar.xz" });
-}
+class BandwidthTrackedStream extends PassThrough {
+  private totalBytes: number = 0;
 
-function fileSize(file: string): number {
-  return fs.statSync(file).size;
+  _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
+    this.totalBytes += chunk.length;
+    super._write(chunk, encoding, callback);
+  }
+
+  getTotalBytes(): number {
+    return this.totalBytes;
+  }
 }
