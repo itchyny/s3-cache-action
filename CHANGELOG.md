@@ -1,4 +1,8 @@
 # Changelog
+## [v1.1.2](https://github.com/itchyny/s3-cache-action/compare/v1.1.1..v1.1.2) (2024-10-01)
+* update `@actions/glob` from 0.4.0 to 0.5.0
+* update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.600.0 to 3.658.1
+
 ## [v1.1.1](https://github.com/itchyny/s3-cache-action/compare/v1.1.0..v1.1.1) (2024-06-19)
 * improve logic for checking cache hit state to skip saving cache
 * update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.540.0 to 3.600.0
