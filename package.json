@@ -33,10 +33,10 @@
     "prepublishOnly": "tsc --declaration"
   },
   "dependencies": {
-    "@actions/core": "^1.10.1",
+    "@actions/core": "^1.11.1",
     "@actions/glob": "^0.5.0",
-    "@aws-sdk/client-s3": "^3.658.1",
-    "@aws-sdk/lib-storage": "^3.658.1",
+    "@aws-sdk/client-s3": "^3.682.0",
+    "@aws-sdk/lib-storage": "^3.682.0",
     "tar": "^6.2.1",
     "tmp": "^0.2.3"
   },
