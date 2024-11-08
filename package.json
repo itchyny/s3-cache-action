@@ -41,13 +41,13 @@
     "tmp": "^0.2.3"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.13",
-    "@types/node": "^22.7.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
     "@types/tar": "^6.1.12",
     "@types/tmp": "^0.2.6",
     "@vercel/ncc": "^0.38.2",
-    "aws-sdk-client-mock": "^4.0.2",
-    "aws-sdk-client-mock-jest": "^4.0.2",
+    "aws-sdk-client-mock": "^4.1.0",
+    "aws-sdk-client-mock-jest": "^4.1.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -57,7 +57,7 @@
     "prettier": "^3.3.3",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2",
-    "typescript-eslint": "^8.8.0"
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0"
   }
 }
