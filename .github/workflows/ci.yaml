@@ -19,14 +19,14 @@ defaults:
 jobs:
   test:
     name: Test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          token: ${{ secrets.DEPENDABOT_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: ${{ github.actor == 'dependabot[bot]' && 2 || 1 }}
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -41,7 +41,16 @@ jobs:
       - name: Build
         run: npm run build
       - name: Check for dist changes
+        id: dist-changes
         run: git diff --exit-code
+      - name: Push dist changes for dependabot
+        if: github.actor == 'dependabot[bot]' && failure() &&
+          steps.dist-changes.outcome == 'failure'
+        run: |
+          git config user.name "$(git show -s --format=%an)"
+          git config user.email "$(git show -s --format=%ae)"
+          git commit --all --amend --no-edit
+          git push --force origin "HEAD:${GITHUB_HEAD_REF}"
       - name: Run prepublishOnly
         run: npm run prepublishOnly
 
