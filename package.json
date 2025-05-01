@@ -35,15 +35,14 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/glob": "^0.5.0",
-    "@aws-sdk/client-s3": "^3.740.0",
-    "@aws-sdk/lib-storage": "^3.740.0",
-    "tar": "^6.2.1",
+    "@aws-sdk/client-s3": "^3.800.0",
+    "@aws-sdk/lib-storage": "^3.800.0",
+    "tar": "^7.4.3",
     "tmp": "^0.2.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.14",
-    "@types/tar": "^6.1.12",
     "@types/tmp": "^0.2.6",
     "@vercel/ncc": "^0.38.3",
     "aws-sdk-client-mock": "^4.1.0",
