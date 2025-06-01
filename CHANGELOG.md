@@ -1,4 +1,8 @@
 # Changelog
+## [v1.1.4](https://github.com/itchyny/s3-cache-action/compare/v1.1.3..v1.1.4) (2025-06-01)
+* update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.701.0 to 3.821.0
+* update `tar` from 6.2.1 to 7.4.3
+
 ## [v1.1.3](https://github.com/itchyny/s3-cache-action/compare/v1.1.2..v1.1.3) (2024-12-01)
 * update `@actions/core` from 1.10.1 to 1.11.1
 * update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.658.1 to 3.701.0
