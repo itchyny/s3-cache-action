@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
+      interval: cron
+      cronjob: 0 0 1 6,12 *
     groups:
       github-actions:
         patterns: ["*"]
@@ -11,7 +12,8 @@ updates:
     directory: /
     versioning-strategy: increase
     schedule:
-      interval: monthly
+      interval: cron
+      cronjob: 0 0 1 6,12 *
     groups:
       npm-dependencies:
         dependency-type: production
