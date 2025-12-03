@@ -42,21 +42,21 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.2.1",
+    "@types/node": "^24.10.1",
     "@types/tmp": "^0.2.6",
-    "@vercel/ncc": "^0.38.3",
+    "@vercel/ncc": "^0.38.4",
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
-    "eslint": "^9.33.0",
+    "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "eslint-plugin-unused-imports": "^4.1.4",
-    "jest": "^30.0.5",
-    "prettier": "^3.6.2",
-    "ts-jest": "^29.4.1",
+    "eslint-plugin-unused-imports": "^4.3.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.7.3",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.0"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.1"
   }
 }
