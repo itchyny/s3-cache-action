@@ -39,7 +39,7 @@ outputs:
       If the cache is restored with one of the restore-keys, the value is "false".
       If the cache is not restored, the value is "".
 runs:
-  using: node20
+  using: node24
   main: ../dist/restore/index.js
 branding:
   icon: archive

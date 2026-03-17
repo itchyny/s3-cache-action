@@ -24,7 +24,7 @@ inputs:
     description: AWS session token to access the bucket
     required: false
 runs:
-  using: node20
+  using: node24
   main: ../dist/save/index.js
 branding:
   icon: archive
