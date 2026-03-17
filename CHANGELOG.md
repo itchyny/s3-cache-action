@@ -1,4 +1,11 @@
 # Changelog
+## [v1.1.6](https://github.com/itchyny/s3-cache-action/compare/v1.1.5..v1.1.6) (2026-03-17)
+* update Node.js to 24
+* update `@actions/core` from 1.11.1 to 2.0.3
+* update `@actions/glob` from 0.5.0 to 0.5.1
+* update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.940.0 to 3.1010.0
+* update `tar` from 7.5.2 to 7.5.11
+
 ## [v1.1.5](https://github.com/itchyny/s3-cache-action/compare/v1.1.4..v1.1.5) (2025-12-03)
 * update `@aws-sdk/client-s3` and `@aws-sdk/lib-storage` from 3.821.0 to 3.940.0
 * update `tar` from 7.4.3 to 7.5.2
