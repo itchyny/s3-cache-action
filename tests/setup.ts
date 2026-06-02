@@ -1,9 +1,7 @@
 import * as s3 from "@aws-sdk/client-s3";
-import { SdkStream } from "@smithy/types";
-import { sdkStreamMixin } from "@smithy/util-stream";
+import { afterEach, beforeEach, jest } from "@jest/globals";
 import { mockClient } from "aws-sdk-client-mock";
 import * as fs from "fs";
-import { Readable } from "stream";
 import * as tmp from "tmp";
 
 export const s3Mock = mockClient(s3.S3Client);
@@ -92,8 +90,8 @@ export function addCleanupFiles(...files: string[]): void {
   cleanupFiles.push(...files);
 }
 
-export function createReadStream(file: string): SdkStream<Readable | ReadableStream | Blob> {
-  return sdkStreamMixin(fs.createReadStream(file));
+export function createReadStream(file: string): s3.GetObjectCommandOutput["Body"] {
+  return fs.createReadStream(file) as unknown as s3.GetObjectCommandOutput["Body"];
 }
 
 export function getState(key: string): string {

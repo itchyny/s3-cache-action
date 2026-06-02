@@ -3,7 +3,7 @@ import "aws-sdk-client-mock-jest";
 import * as s3 from "@aws-sdk/client-s3";
 import * as fs from "fs";
 
-import { restore } from "../src/restore";
+import { restore } from "../src/restore.js";
 import {
   addCleanupFiles,
   createReadStream,
@@ -11,7 +11,7 @@ import {
   getState,
   s3Mock,
   setupInputs,
-} from "./setup";
+} from "./setup.js";
 
 describe("restore", () => {
   it("should restore the cache", async () => {

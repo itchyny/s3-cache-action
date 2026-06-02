@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as tar from "tar";
 import * as tmp from "tmp";
 
-import { Client } from "./client";
+import { Client } from "./client.js";
 
 /**
  * Save cache to Amazon S3.

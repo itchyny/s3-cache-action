@@ -1,8 +1,8 @@
 import * as core from "@actions/core";
 
-import { saveCache } from "./cache";
-import { Inputs, State } from "./constants";
-import { newS3Client, splitInput } from "./utils";
+import { saveCache } from "./cache.js";
+import { Inputs, State } from "./constants.js";
+import { newS3Client, splitInput } from "./utils.js";
 
 export async function save() {
   // Get the inputs.
@@ -25,7 +25,7 @@ export async function save() {
   await saveCache(path, key, bucketName, newS3Client());
 }
 
-if (require.main === module) {
+if (import.meta.main) {
   (async () => {
     try {
       await save();

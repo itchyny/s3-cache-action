@@ -12,6 +12,7 @@
   "bugs": {
     "url": "https://github.com/itchyny/s3-cache-action/issues"
   },
+  "type": "module",
   "main": "lib/cache.js",
   "types": "lib/cache.d.ts",
   "files": [
@@ -27,7 +28,7 @@
   ],
   "scripts": {
     "build": "ncc build -m -o dist/restore src/restore.ts && ncc build -m -o dist/save src/save.ts",
-    "test": "jest --runInBand",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=ExperimentalWarning' jest --runInBand",
     "lint": "eslint *.ts *.mjs src/*.ts tests/*.ts",
     "lint:fix": "eslint --fix *.ts *.mjs src/*.ts tests/*.ts",
     "prepublishOnly": "tsc --declaration"

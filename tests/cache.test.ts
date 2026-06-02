@@ -3,8 +3,8 @@ import "aws-sdk-client-mock-jest";
 import * as s3 from "@aws-sdk/client-s3";
 import * as fs from "fs";
 
-import { lookupCache, restoreCache, saveCache } from "../src/cache";
-import { addCleanupFiles, createReadStream, s3Mock } from "./setup";
+import { lookupCache, restoreCache, saveCache } from "../src/cache.js";
+import { addCleanupFiles, createReadStream, s3Mock } from "./setup.js";
 
 const bucketName = "test-bucket-name";
 const s3Client = new s3.S3Client({ region: "ap-northeast-1" });

@@ -1,8 +1,8 @@
 import * as core from "@actions/core";
 
-import { lookupCache, restoreCache } from "./cache";
-import { Inputs, Outputs, State } from "./constants";
-import { newS3Client, splitInput } from "./utils";
+import { lookupCache, restoreCache } from "./cache.js";
+import { Inputs, Outputs, State } from "./constants.js";
+import { newS3Client, splitInput } from "./utils.js";
 
 export async function restore() {
   // Get the inputs.
@@ -37,7 +37,7 @@ export async function restore() {
   }
 }
 
-if (require.main === module) {
+if (import.meta.main) {
   (async () => {
     try {
       await restore();
