@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as s3 from "@aws-sdk/client-s3";
 
-import { Env, Inputs } from "./constants";
+import { Env, Inputs } from "./constants.js";
 
 export function splitInput(str: string): string[] {
   return str

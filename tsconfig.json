@@ -2,9 +2,11 @@
   "include": ["src/**/*"],
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "rootDir": "src",
     "outDir": "lib",
-    "strict": true
+    "strict": true,
+    "isolatedModules": true
   }
 }

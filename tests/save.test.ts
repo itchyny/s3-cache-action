@@ -2,8 +2,8 @@ import "aws-sdk-client-mock-jest";
 
 import * as s3 from "@aws-sdk/client-s3";
 
-import { save } from "../src/save";
-import { s3Mock, setState, setupInputs } from "./setup";
+import { save } from "../src/save.js";
+import { s3Mock, setState, setupInputs } from "./setup.js";
 
 describe("save", () => {
   it("should save the cache successfully", async () => {
