@@ -38,7 +38,7 @@
     "@actions/glob": "^0.7.0",
     "@aws-sdk/client-s3": "^3.1057.0",
     "@aws-sdk/lib-storage": "^3.1057.0",
-    "tar": "^7.5.15",
+    "tar": "^7.5.16",
     "tmp": "^0.2.7"
   },
   "devDependencies": {
