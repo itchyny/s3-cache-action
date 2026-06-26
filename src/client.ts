@@ -1,10 +1,10 @@
+import { once } from "node:events";
+import type * as fs from "node:fs";
+import type { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import * as core from "@actions/core";
 import * as s3 from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { once } from "events";
-import * as fs from "fs";
-import { Readable } from "stream";
-import { pipeline } from "stream/promises";
 
 export class Client {
   constructor(

@@ -1,7 +1,7 @@
+import * as fs from "node:fs";
 import * as s3 from "@aws-sdk/client-s3";
 import { afterEach, beforeEach, jest } from "@jest/globals";
 import { mockClient } from "aws-sdk-client-mock";
-import * as fs from "fs";
 import * as tmp from "tmp";
 
 export const s3Mock = mockClient(s3.S3Client);

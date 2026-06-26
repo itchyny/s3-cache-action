@@ -1,7 +1,7 @@
 import "aws-sdk-client-mock-jest";
 
+import * as fs from "node:fs";
 import * as s3 from "@aws-sdk/client-s3";
-import * as fs from "fs";
 
 import { restore } from "../src/restore.js";
 import {
